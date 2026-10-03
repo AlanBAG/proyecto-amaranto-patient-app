@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Arco Verde Exterior -->
+    <path
+        android:pathData="M 95,20 A 75,75 0 1,1 138,162"
+        android:strokeColor="#38761D"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+
+    <!-- Hoja Verde Izquierda y Tallo -->
+    <path
+        android:pathData="M 60,115 C 45,100 50,135 85,155 C 80,130 70,120 60,115 Z"
+        android:fillColor="#38761D" />
+
+    <!-- Figura Humana en Verde (Cabeza y Cuerpo en V) -->
+    <path
+        android:pathData="M 110,48 A 10,10 0 1,1 110,28 A 10,10 0 1,1 110,48 Z"
+        android:fillColor="#38761D" />
+    <path
+        android:pathData="M 92,58 C 110,70 120,68 135,55 C 122,80 115,105 105,145 C 98,110 90,85 92,58 Z"
+        android:fillColor="#38761D" />
+
+    <!-- Racimo de Espiga de Amaranto en Magenta -->
+    <!-- Granos superiores a inferiores -->
+    <path android:pathData="M 82,18 A 6,8 0 1,1 82,34 A 6,8 0 1,1 82,18 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 74,28 A 7,9 0 1,1 74,46 A 7,9 0 1,1 74,28 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 88,32 A 7,9 0 1,1 88,50 A 7,9 0 1,1 88,32 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 68,42 A 8,10 0 1,1 68,62 A 8,10 0 1,1 68,42 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 82,48 A 8,10 0 1,1 82,68 A 8,10 0 1,1 82,48 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 62,58 A 8,10 0 1,1 62,78 A 8,10 0 1,1 62,58 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 76,64 A 8,10 0 1,1 76,84 A 8,10 0 1,1 76,64 Z" android:fillColor="#C2004D" />
+    <path android:pathData="M 70,82 A 7,9 0 1,1 70,100 A 7,9 0 1,1 70,82 Z" android:fillColor="#C2004D" />
+
+    <!-- Corazón en Rojo Coral -->
+    <path
+        android:pathData="M 140,118 C 130,100 115,120 128,140 L 140,158 L 152,140 C 165,120 150,100 140,118 Z"
+        android:fillColor="#FF4B60" />
+
+</vector>

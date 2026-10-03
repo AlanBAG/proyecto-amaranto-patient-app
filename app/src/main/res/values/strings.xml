@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Proyecto Amaranto</string>
+    <string name="app_tagline">Tu salud, en buenas manos</string>
+    <string name="login_title">Acceso a Pacientes</string>
+    <string name="login_subtitle">Ingresa tus credenciales para acceder a tu historial clínico</string>
+    <string name="register_title">Registro de Paciente</string>
+    <string name="register_subtitle">Crea tu cuenta de paciente en el sistema Amaranto</string>
+    <string name="profile_title">Expediente Clínico</string>
+    <string name="readonly_badge">SOLO LECTURA</string>
+</resources>
