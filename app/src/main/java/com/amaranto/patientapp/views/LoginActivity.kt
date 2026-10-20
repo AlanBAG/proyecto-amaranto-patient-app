@@ -12,6 +12,7 @@ import com.amaranto.patientapp.databinding.ActivityLoginBinding
 import com.amaranto.patientapp.models.LoginRequest
 import com.amaranto.patientapp.utils.SessionManager
 import kotlinx.coroutines.launch
+import com.amaranto.patientapp.home.HomeActivity
 
 /**
  * Pantalla de Inicio de Sesión para Pacientes.
@@ -126,7 +127,7 @@ class LoginActivity : AppCompatActivity() {
      * Navega a la pantalla del Expediente del Paciente finalizando la actividad actual.
      */
     private fun navigateToProfile() {
-        val intent = Intent(this, ProfileActivity::class.java)
+        val intent = Intent(this, HomeActivity::class.java)   // antes: ProfileActivity
         startActivity(intent)
         finish()
     }

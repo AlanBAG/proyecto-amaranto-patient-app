@@ -7,4 +7,10 @@
     <string name="register_subtitle">Crea tu cuenta de paciente en el sistema Amaranto</string>
     <string name="profile_title">Expediente Clínico</string>
     <string name="readonly_badge">SOLO LECTURA</string>
+    <string name="nav_citas">Citas</string>
+    <string name="nav_avances">Avances</string>
+    <string name="nav_suscripciones">Suscripciones</string>
+    <string name="nav_notificaciones">Notificaciones</string>
+    <string name="home_open_profile">Mi expediente</string>
+    <string name="placeholder_coming_soon">Próximamente</string>
 </resources>

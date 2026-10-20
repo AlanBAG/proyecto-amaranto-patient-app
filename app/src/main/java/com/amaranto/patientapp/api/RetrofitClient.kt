@@ -1,11 +1,13 @@
 package com.amaranto.patientapp.api
 
 import okhttp3.Interceptor
-import okhttp3.MediaType
+// import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Response
-import okhttp3.ResponseBody
+// import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -30,7 +32,8 @@ object RetrofitClient {
      * cuando `USE_MOCK_DATA` está activado en `true`.
      */
     private val mockInterceptor = Interceptor { chain ->
-        val path = chain.request().url().encodedPath()
+        // val path = chain.request().url().encodedPath()
+        val path = chain.request().url.encodedPath
 
         val jsonResponse = when {
             // Simular Registro de Paciente (POST /api/register)
@@ -86,8 +89,9 @@ object RetrofitClient {
         // Simular retardo de red de 500 ms para realismo visual en la UI
         Thread.sleep(500)
 
-        val mediaType = MediaType.parse("application/json")
-        val responseBody = ResponseBody.create(mediaType, jsonResponse)
+        // val mediaType = MediaType.parse("application/json")
+        // val responseBody = ResponseBody.create(mediaType, jsonResponse)
+        val responseBody = jsonResponse.toResponseBody("application/json".toMediaType())
 
         Response.Builder()
             .request(chain.request())
