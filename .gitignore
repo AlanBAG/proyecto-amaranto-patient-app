@@ -1,15 +1,29 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle y archivos temporales de compilación
+.gradle/
+**/build/
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Claves de firma y credenciales locales sensible (SECRETS)
 local.properties
+*.keystore
+*.jks
+*.p8
+*.p12
+*.key
+google-services.json
+GoogleService-Info.plist
+
+# Archivos de configuración del IDE (Android Studio / IntelliJ)
+.idea/
+*.iml
+.DS_Store
+
+# Archivos temporales de APK y AAB
+*.apk
+*.aab
+
+# Logs
+*.log
