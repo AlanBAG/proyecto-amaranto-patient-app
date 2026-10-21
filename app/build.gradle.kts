@@ -1,3 +1,13 @@
+import java.util.Properties
+
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val debugBaseUrl: String = localProps
+    .getProperty("amaranto.baseUrl", "http://10.0.2.2:8000/")
+    .let { if (it.endsWith("/")) it else "$it/" }
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -20,9 +30,12 @@ android {
     }
 
     buildTypes {
-        debug {
+        /*debug {
             // 10.0.2.2 = localhost de tu PC visto desde el emulador
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
+        }*/
+        debug {
+            buildConfigField("String", "BASE_URL", "\"$debugBaseUrl\"")
         }
         release {
             // TODO: reemplazar por la URL HTTPS real del backend
@@ -81,4 +94,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
