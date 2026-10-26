@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.amaranto.patientapp.core.ui.PlaceholderScreen
+import com.amaranto.patientapp.plan.PlanNutricionalScreen
 
 @Composable
 fun AmarantoNavHost(
@@ -15,11 +16,16 @@ fun AmarantoNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppDestination.Citas.route,
+        startDestination = AppDestination.PlanNutricional.route,
         modifier = modifier
     ) {
-        // Cada fase reemplaza su placeholder por la pantalla real de su feature.
-        AppDestination.entries.forEach { destination ->
+        // Pantalla real del Módulo Plan Nutricional
+        composable(AppDestination.PlanNutricional.route) {
+            PlanNutricionalScreen()
+        }
+
+        // Placeholders para las demás secciones
+        AppDestination.entries.filter { it != AppDestination.PlanNutricional }.forEach { destination ->
             composable(destination.route) {
                 PlaceholderScreen(title = stringResource(destination.label))
             }

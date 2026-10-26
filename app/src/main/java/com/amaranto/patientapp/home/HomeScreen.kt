@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.ui.theme.AmarantoTheme
 import com.amaranto.patientapp.navigation.AmarantoNavHost
 import com.amaranto.patientapp.navigation.AppDestination
 
@@ -75,5 +77,16 @@ fun HomeScreen(onOpenProfile: () -> Unit) {
             navController = navController,
             modifier = Modifier.padding(innerPadding)
         )
+    }
+}
+
+/**
+ * Vista previa visual directa dentro del editor de Android Studio.
+ */
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    AmarantoTheme {
+        HomeScreen(onOpenProfile = {})
     }
 }

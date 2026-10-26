@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 /**
  * Interfaz de Retrofit que define las rutas (endpoints) del backend en Laravel + MongoDB (amaranto_db).
@@ -47,4 +48,32 @@ interface ApiService {
     suspend fun getHistorialClinicoMe(
         @Header("Authorization") token: String
     ): Response<HistorialClinicoResponse>
+
+    /**
+     * Módulo Plan Nutricional: Obtener los planes guardados del paciente.
+     * GET /api/mis-planes
+     */
+    @GET("api/mis-planes")
+    suspend fun getMisPlanes(
+        @Header("Authorization") token: String
+    ): Response<List<PlanNutricionalResponse>>
+
+    /**
+     * Módulo Plan Nutricional: Obtener detalle de una receta.
+     * GET /api/recetas/{id}
+     */
+    @GET("api/recetas/{id}")
+    suspend fun getRecetaDetalle(
+        @Header("Authorization") token: String,
+        @Path("id") id: String
+    ): Response<RecetaResponse>
+
+    /**
+     * Módulo Plan Nutricional: Obtener catálogo completo de recetas.
+     * GET /api/recetas
+     */
+    @GET("api/recetas")
+    suspend fun getRecetas(
+        @Header("Authorization") token: String
+    ): Response<List<RecetaResponse>>
 }
