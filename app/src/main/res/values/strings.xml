@@ -7,6 +7,7 @@
     <string name="register_subtitle">Crea tu cuenta de paciente en el sistema Amaranto</string>
     <string name="profile_title">Expediente Clínico</string>
     <string name="readonly_badge">SOLO LECTURA</string>
+    <string name="nav_plan_nutricional">Plan Nutricional</string>
     <string name="nav_citas">Citas</string>
     <string name="nav_avances">Avances</string>
     <string name="nav_suscripciones">Suscripciones</string>
