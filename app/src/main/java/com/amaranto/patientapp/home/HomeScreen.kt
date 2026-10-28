@@ -23,7 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.amaranto.patientapp.R
 import com.amaranto.patientapp.navigation.AmarantoNavHost
 import com.amaranto.patientapp.navigation.AppDestination
-
+import androidx.navigation.NavDestination.Companion.hierarchy
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onOpenProfile: () -> Unit) {
@@ -54,7 +54,8 @@ fun HomeScreen(onOpenProfile: () -> Unit) {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 AppDestination.entries.forEach { destination ->
                     NavigationBarItem(
-                        selected = currentRoute == destination.route,
+                        selected = backStackEntry?.destination?.hierarchy
+                            ?.any { it.route == destination.route } == true,
                         onClick = {
                             navController.navigate(destination.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {

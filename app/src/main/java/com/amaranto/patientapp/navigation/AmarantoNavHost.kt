@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.amaranto.patientapp.core.ui.PlaceholderScreen
+import com.amaranto.patientapp.feature.suscripciones.ui.suscripcionesGraph
 
 @Composable
 fun AmarantoNavHost(
@@ -18,11 +19,15 @@ fun AmarantoNavHost(
         startDestination = AppDestination.Citas.route,
         modifier = modifier
     ) {
-        // Cada fase reemplaza su placeholder por la pantalla real de su feature.
-        AppDestination.entries.forEach { destination ->
-            composable(destination.route) {
-                PlaceholderScreen(title = stringResource(destination.label))
-            }
+        composable(AppDestination.Citas.route) {
+            PlaceholderScreen(stringResource(AppDestination.Citas.label))
+        }
+        composable(AppDestination.Avances.route) {
+            PlaceholderScreen(stringResource(AppDestination.Avances.label))
+        }
+        suscripcionesGraph(navController)
+        composable(AppDestination.Notificaciones.route) {
+            PlaceholderScreen(stringResource(AppDestination.Notificaciones.label))
         }
     }
 }
