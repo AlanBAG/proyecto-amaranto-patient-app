@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.amaranto.patientapp.core.ui.PlaceholderScreen
 import com.amaranto.patientapp.feature.suscripciones.ui.suscripcionesGraph
-
+import com.amaranto.patientapp.plan.PlanNutricionalScreen
 @Composable
 fun AmarantoNavHost(
     navController: NavHostController,
@@ -16,18 +16,14 @@ fun AmarantoNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppDestination.Citas.route,
+        startDestination = AppDestination.PlanNutricional.route,
         modifier = modifier
     ) {
-        composable(AppDestination.Citas.route) {
-            PlaceholderScreen(stringResource(AppDestination.Citas.label))
+        composable(AppDestination.PlanNutricional.route) {
         }
-        composable(AppDestination.Avances.route) {
-            PlaceholderScreen(stringResource(AppDestination.Avances.label))
-        }
+        composable(AppDestination.Citas.route) { PlaceholderScreen(stringResource(AppDestination.Citas.label)) }
+        composable(AppDestination.Avances.route) { PlaceholderScreen(stringResource(AppDestination.Avances.label)) }
         suscripcionesGraph(navController)
-        composable(AppDestination.Notificaciones.route) {
-            PlaceholderScreen(stringResource(AppDestination.Notificaciones.label))
-        }
+        composable(AppDestination.Notificaciones.route) { PlaceholderScreen(stringResource(AppDestination.Notificaciones.label)) }
     }
 }
