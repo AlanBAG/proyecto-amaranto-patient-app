@@ -22,6 +22,10 @@
             android:name=".home.HomeActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".feature.suscripciones.ui.SuscripcionesActivity"
+            android:exported="false" />
+
         <!-- Pantalla de Inicio de Sesión (Lanzador principal de la app) -->
         <activity
             android:name=".views.LoginActivity"

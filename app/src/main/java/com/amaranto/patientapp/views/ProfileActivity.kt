@@ -11,6 +11,7 @@ import com.amaranto.patientapp.api.RetrofitClient
 import com.amaranto.patientapp.databinding.ActivityProfileBinding
 import com.amaranto.patientapp.utils.SessionManager
 import kotlinx.coroutines.launch
+import com.amaranto.patientapp.feature.suscripciones.ui.SuscripcionesActivity
 
 /**
  * Pantalla del Expediente Clínico del Paciente.
@@ -43,6 +44,10 @@ class ProfileActivity : AppCompatActivity() {
         binding.btnLogout.setOnClickListener {
             Log.d(TAG, "🚪 Cierre de sesión solicitado por el paciente")
             logoutUser()
+        }
+
+        binding.btnSuscripciones.setOnClickListener {
+            startActivity(Intent(this, SuscripcionesActivity::class.java))
         }
 
         // Cargar datos del perfil e historial clínico desde el backend

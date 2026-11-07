@@ -55,4 +55,9 @@
     <string name="pago_exito_titulo">¡Suscripción activada!</string>
     <string name="pago_exito_detalle">Tu plan %1$s está activo hasta el %2$s.</string>
     <string name="pago_listo">Listo</string>
+
+    <string name="nav_recetas">Recetas</string>
+    <string name="home_open_notificaciones">Notificaciones</string>
+    <string name="profile_suscripcion">Mi suscripción</string>
+    <string name="action_back">Atrás</string>
 </resources>

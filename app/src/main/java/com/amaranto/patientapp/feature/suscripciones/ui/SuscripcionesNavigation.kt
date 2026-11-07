@@ -4,9 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import com.amaranto.patientapp.navigation.AppDestination
 
 object SuscripcionesRoutes {
     const val LISTA = "suscripciones/lista"
@@ -15,20 +13,15 @@ object SuscripcionesRoutes {
 }
 
 fun NavGraphBuilder.suscripcionesGraph(navController: NavHostController) {
-    navigation(
-        route = AppDestination.Suscripciones.route,
-        startDestination = SuscripcionesRoutes.LISTA
+    composable(SuscripcionesRoutes.LISTA) {
+        SuscripcionesRoute(
+            onContratar = { planId -> navController.navigate(SuscripcionesRoutes.pago(planId)) }
+        )
+    }
+    composable(
+        route = SuscripcionesRoutes.PAGO,
+        arguments = listOf(navArgument("planId") { type = NavType.StringType })
     ) {
-        composable(SuscripcionesRoutes.LISTA) {
-            SuscripcionesRoute(
-                onContratar = { planId -> navController.navigate(SuscripcionesRoutes.pago(planId)) }
-            )
-        }
-        composable(
-            route = SuscripcionesRoutes.PAGO,
-            arguments = listOf(navArgument("planId") { type = NavType.StringType })
-        ) {
-            PagoRoute(onClose = { navController.popBackStack() })
-        }
+        PagoRoute(onClose = { navController.popBackStack() })
     }
 }
