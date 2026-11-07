@@ -1,7 +1,6 @@
 package com.amaranto.patientapp.feature.suscripciones.di
 
 import com.amaranto.patientapp.BuildConfig
-import com.amaranto.patientapp.core.session.SessionProvider
 import com.amaranto.patientapp.feature.suscripciones.data.FakeSuscripcionesRepository
 import com.amaranto.patientapp.feature.suscripciones.data.RemoteSuscripcionesRepository
 import com.amaranto.patientapp.feature.suscripciones.data.payment.SimulatedPaymentGateway
@@ -26,12 +25,9 @@ object SuscripcionesModule {
 
     @Provides
     @Singleton
-    fun provideSuscripcionesRepository(
-        api: SuscripcionesApi,
-        sessionProvider: SessionProvider
-    ): SuscripcionesRepository =
+    fun provideSuscripcionesRepository(api: SuscripcionesApi): SuscripcionesRepository =
         if (BuildConfig.USE_FAKE_DATA) FakeSuscripcionesRepository()
-        else RemoteSuscripcionesRepository(api, sessionProvider)
+        else RemoteSuscripcionesRepository(api)
 
     @Provides
     @Singleton

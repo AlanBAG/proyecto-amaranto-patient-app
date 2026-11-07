@@ -131,7 +131,7 @@ class PagoViewModel @Inject constructor(
     @StringRes
     private fun AppError.toSubmitMessageRes(): Int = when (this) {
         AppError.Conflict -> R.string.pago_error_ya_activa
-        AppError.Validation, AppError.NotFound -> R.string.pago_error_plan_invalido
-        else -> messageRes()
+        AppError.Validation -> R.string.pago_error_plan_invalido
+        else -> messageRes()   // incluye 404 "sin registro de paciente"
     }
 }

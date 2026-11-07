@@ -7,6 +7,7 @@ import com.amaranto.patientapp.feature.suscripciones.domain.model.EstadoSuscripc
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Frecuencia
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Plan
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Suscripcion
+import com.amaranto.patientapp.feature.suscripciones.domain.model.isVigente
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -54,14 +55,14 @@ class FakeSuscripcionesRepository : SuscripcionesRepository {
 
     override suspend fun getSuscripcionActiva(): ApiResult<Suscripcion?> {
         delay(LATENCY_MS)
-        return ApiResult.Success(activa)
+        return ApiResult.Success(activa?.takeIf { it.isVigente() })
     }
 
     override suspend fun contratar(planId: String): ApiResult<Suscripcion> {
         delay(LATENCY_MS)
         val plan = planes.firstOrNull { it.id == planId }
             ?: return ApiResult.Failure(AppError.Validation)
-        if (activa != null) return ApiResult.Failure(AppError.Conflict)
+        if (activa?.estado == EstadoSuscripcion.ACTIVA) return ApiResult.Failure(AppError.Conflict)
 
         val ahora = Instant.now()
         val dias = when (plan.frecuencia) {
@@ -83,11 +84,13 @@ class FakeSuscripcionesRepository : SuscripcionesRepository {
     override suspend fun cancelar(suscripcionId: String): ApiResult<Unit> {
         delay(LATENCY_MS)
         val actual = activa
-        return if (actual == null || actual.id != suscripcionId) {
-            ApiResult.Failure(AppError.NotFound)
-        } else {
-            activa = null
-            ApiResult.Success(Unit)
+        return when {
+            actual == null || actual.id != suscripcionId -> ApiResult.Failure(AppError.NotFound)
+            actual.estado != EstadoSuscripcion.ACTIVA -> ApiResult.Failure(AppError.Validation)
+            else -> {
+                activa = actual.copy(estado = EstadoSuscripcion.CANCELADA)
+                ApiResult.Success(Unit)
+            }
         }
     }
 

@@ -15,16 +15,17 @@
     <string name="suscripciones_tu_suscripcion">Tu suscripción</string>
     <string name="suscripciones_vigencia">Vigente del %1$s al %2$s</string>
     <string name="suscripciones_planes_disponibles">Planes disponibles</string>
-    <string name="suscripciones_ya_activa_aviso">Ya tienes una suscripción activa. Cancélala para contratar otro plan.</string>
+    <string name="suscripciones_ya_activa_aviso">Ya tienes una suscripción vigente. Podrás contratar otro plan cuando termine tu periodo.</string>
     <string name="suscripciones_precio_frecuencia">%1$s · %2$s</string>
     <string name="suscripciones_contratar">Contratar</string>
     <string name="suscripciones_vacio">Por ahora no hay planes disponibles.</string>
-    <string name="suscripciones_cancelada_ok">Suscripción cancelada.</string>
+    <string name="suscripciones_cancelada_ok">Suscripción cancelada. Conservas tu acceso hasta el fin de tu periodo.</string>
     <string name="suscripciones_cancelar">Cancelar suscripción</string>
     <string name="suscripciones_cancelar_titulo">¿Cancelar suscripción?</string>
-    <string name="suscripciones_cancelar_texto">Perderás los beneficios de tu plan. Esta acción no se puede deshacer.</string>
+    <string name="suscripciones_cancelar_texto">No hay reembolso. Conservarás tu acceso hasta que termine tu periodo y no se te cobrará de nuevo.</string>
     <string name="suscripciones_cancelar_confirmar">Sí, cancelar</string>
     <string name="suscripciones_cancelar_volver">Volver</string>
+    <string name="suscripciones_acceso_hasta">Tu acceso termina el %1$s</string>
 
     <string name="frecuencia_mensual">Mensual</string>
     <string name="frecuencia_trimestral">Trimestral</string>

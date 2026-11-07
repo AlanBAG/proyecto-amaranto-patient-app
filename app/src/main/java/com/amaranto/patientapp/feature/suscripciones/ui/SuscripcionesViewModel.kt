@@ -72,7 +72,8 @@ class SuscripcionesViewModel @Inject constructor(
                         error = null,
                         planes = planes,
                         suscripcionActiva = activa,
-                        planActivo = planes.firstOrNull { plan -> plan.id == activa?.planId }
+                        // Prioriza el plan embebido en la suscripción (puede estar inactivo y no venir en `planes`)
+                        planActivo = activa?.plan ?: planes.firstOrNull { p -> p.id == activa?.planId }
                     )
                 }
             } else {
