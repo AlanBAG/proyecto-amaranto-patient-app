@@ -16,7 +16,8 @@ data class SuscripcionDto(
     @SerializedName("plan_id") val planId: String?,
     @SerializedName("fecha_inicio") val fechaInicio: String?,
     @SerializedName("fecha_fin") val fechaFin: String?,
-    @SerializedName("estado") val estado: String?
+    @SerializedName("estado") val estado: String?,
+    @SerializedName("plan") val plan: PlanDto?
 )
 
 data class CrearSuscripcionRequest(

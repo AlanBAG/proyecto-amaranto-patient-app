@@ -26,6 +26,9 @@ import com.amaranto.patientapp.core.ui.theme.AmarantoTheme
 import com.amaranto.patientapp.navigation.AmarantoNavHost
 import com.amaranto.patientapp.navigation.AppDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.compose.material.icons.filled.Notifications
+import com.amaranto.patientapp.navigation.AppRoutes
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onOpenProfile: () -> Unit) {
@@ -43,6 +46,14 @@ fun HomeScreen(onOpenProfile: () -> Unit) {
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 actions = {
+                    IconButton(onClick = {
+                        navController.navigate(AppRoutes.NOTIFICACIONES) { launchSingleTop = true }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            contentDescription = stringResource(R.string.home_open_notificaciones)
+                        )
+                    }
                     IconButton(onClick = onOpenProfile) {
                         Icon(
                             imageVector = Icons.Filled.Person,

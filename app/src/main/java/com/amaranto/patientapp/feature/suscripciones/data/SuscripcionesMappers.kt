@@ -33,7 +33,8 @@ internal fun SuscripcionDto.toDomain(): Suscripcion? {
         planId = planId,
         fechaInicio = inicio,
         fechaFin = fin,
-        estado = EstadoSuscripcion.fromApi(this.estado)
+        estado = EstadoSuscripcion.fromApi(this.estado),
+        plan = this.plan?.toDomain()
     )
 }
 

@@ -42,5 +42,11 @@ data class Suscripcion(
     val planId: String,
     val fechaInicio: Instant,
     val fechaFin: Instant,
-    val estado: EstadoSuscripcion
+    val estado: EstadoSuscripcion,
+    val plan: Plan? = null
 )
+
+/** Activa, o cancelada pero con acceso hasta fecha_fin (no hay reembolso: se conserva el acceso). */
+fun Suscripcion.isVigente(now: Instant = Instant.now()): Boolean =
+    fechaFin.isAfter(now) &&
+            (estado == EstadoSuscripcion.ACTIVA || estado == EstadoSuscripcion.CANCELADA)

@@ -2,11 +2,11 @@ package com.amaranto.patientapp.feature.suscripciones
 
 import com.amaranto.patientapp.core.network.ApiResult
 import com.amaranto.patientapp.core.network.AppError
-import com.amaranto.patientapp.core.session.FakeSessionProvider
 import com.amaranto.patientapp.feature.suscripciones.data.RemoteSuscripcionesRepository
 import com.amaranto.patientapp.feature.suscripciones.data.remote.SuscripcionesApi
 import com.amaranto.patientapp.feature.suscripciones.domain.model.EstadoSuscripcion
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Frecuencia
+import com.amaranto.patientapp.feature.suscripciones.domain.model.Plan
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -15,8 +15,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Retrofit
@@ -35,7 +33,7 @@ class RemoteSuscripcionesRepositoryTest {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(SuscripcionesApi::class.java)
-        repository = RemoteSuscripcionesRepository(api, FakeSessionProvider("token-a"))
+        repository = RemoteSuscripcionesRepository(api)
     }
 
     @After
@@ -111,17 +109,53 @@ class RemoteSuscripcionesRepositoryTest {
     }
 
     @Test
-    fun `sin mis-suscripciones usa la suscripcion creada en la sesion`() = runTest {
-        server.enqueue(
-            MockResponse().setResponseCode(201)
-                .setBody(suscripcionJson("sub-1", Instant.now().plus(10, ChronoUnit.DAYS)))
-        )
-        server.enqueue(MockResponse().setResponseCode(404)) // endpoint aún no construido
+    fun `getPlanes con 404 devuelve lista vacia`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(404).setBody("""{"message":"No planes found"}"""))
+        assertEquals(ApiResult.Success(emptyList<Plan>()), repository.getPlanes())
+    }
 
-        repository.contratar("abc")
+    private fun misSuscripcionesJson(estado: String, fin: Instant) = """
+    [{"id":"sub-1","paciente_id":"p1","plan_id":"plan-1",
+      "fecha_inicio":"2026-10-30T18:43:15.974000Z","fecha_fin":"$fin","estado":"$estado",
+      "plan":{"id":"plan-1","nombre":"Plan Nutricional Mensual","precio":499,
+              "frecuencia":"mensual","descripcion":"d","activo":true}}]
+""".trimIndent()
+
+    @Test
+    fun `mis-suscripciones activa devuelve la suscripcion con su plan`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200)
+            .setBody(misSuscripcionesJson("activa", Instant.now().plus(10, ChronoUnit.DAYS))))
+
         val activa = (repository.getSuscripcionActiva() as ApiResult.Success).data
 
-        assertNotNull(activa)
-        assertTrue(activa!!.id == "sub-1")
+        assertEquals(EstadoSuscripcion.ACTIVA, activa?.estado)
+        assertEquals("Plan Nutricional Mensual", activa?.plan?.nombre)
+        assertEquals("/api/mis-suscripciones", server.takeRequest().path)
+    }
+
+    @Test
+    fun `cancelada con fecha_fin futura sigue vigente`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200)
+            .setBody(misSuscripcionesJson("cancelada", Instant.now().plus(10, ChronoUnit.DAYS))))
+
+        val vigente = (repository.getSuscripcionActiva() as ApiResult.Success).data
+
+        assertEquals(EstadoSuscripcion.CANCELADA, vigente?.estado)
+    }
+
+    @Test
+    fun `cancelada con fecha_fin pasada ya no es vigente`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200)
+            .setBody(misSuscripcionesJson("cancelada", Instant.now().minus(1, ChronoUnit.DAYS))))
+
+        assertEquals(ApiResult.Success(null), repository.getSuscripcionActiva())
+    }
+
+    @Test
+    fun `404 en mis-suscripciones significa sin suscripcion`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(404)
+            .setBody("""{"message":"No suscripciones found"}"""))
+
+        assertEquals(ApiResult.Success(null), repository.getSuscripcionActiva())
     }
 }

@@ -27,10 +27,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,6 +39,7 @@ import com.amaranto.patientapp.core.ui.EmptyState
 import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
 import com.amaranto.patientapp.core.ui.messageRes
+import com.amaranto.patientapp.feature.suscripciones.domain.model.EstadoSuscripcion
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Plan
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Suscripcion
 
@@ -49,7 +50,7 @@ fun SuscripcionesRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
 
@@ -57,9 +58,9 @@ fun SuscripcionesRoute(
         viewModel.events.collect { event ->
             val message = when (event) {
                 SuscripcionesEvent.Cancelled ->
-                    context.getString(R.string.suscripciones_cancelada_ok)
+                    resources.getString(R.string.suscripciones_cancelada_ok)
                 is SuscripcionesEvent.ShowError ->
-                    context.getString(event.error.messageRes())
+                    resources.getString(event.error.messageRes())
             }
             snackbarHostState.showSnackbar(message)
         }
@@ -190,12 +191,22 @@ private fun SuscripcionActivaCard(
                 ),
                 style = MaterialTheme.typography.bodyMedium
             )
-            OutlinedButton(onClick = onCancelClick, enabled = !isCancelling) {
-                if (isCancelling) {
-                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                } else {
-                    Text(stringResource(R.string.suscripciones_cancelar))
+            if (suscripcion.estado == EstadoSuscripcion.ACTIVA) {
+                OutlinedButton(onClick = onCancelClick, enabled = !isCancelling) {
+                    if (isCancelling) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text(stringResource(R.string.suscripciones_cancelar))
+                    }
                 }
+            } else {
+                Text(
+                    text = stringResource(
+                        R.string.suscripciones_acceso_hasta,
+                        suscripcion.fechaFin.toDateText()
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
