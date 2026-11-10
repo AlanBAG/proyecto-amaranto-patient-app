@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Paleta de Colores Oficial del Logo "Proyecto Amaranto" -->
-    <!-- Magenta / Rojo Amaranto (AMARANTO) -->
-    <color name="primary">#C2004D</color>
+    <!-- Rosa Amaranto (AMARANTO) -->
+    <color name="primary">#E876B0</color>
     <color name="primary_dark">@color/brand_heart</color>
-    <color name="primary_light">#E61A68</color>
+    <color name="primary_light">#F1ADD0</color>
 
     <!-- Verde Hoja (PROYECTO / Tu salud, en buenas manos) -->
     <color name="brand_green">#38761D</color>

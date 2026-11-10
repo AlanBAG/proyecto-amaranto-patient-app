@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.amaranto.patientapp.api.RetrofitClient
+import com.amaranto.patientapp.core.ui.theme.accentText
 import com.amaranto.patientapp.models.IngredienteItem
 import com.amaranto.patientapp.models.PlanNutricionalResponse
 import com.amaranto.patientapp.models.RecetaResponse
@@ -156,7 +157,7 @@ fun PlanNutricionalScreen() {
                     text = planNutricional?.nombre ?: "Mi Plan Nutricional",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.accentText
                 )
             }
 
@@ -175,7 +176,7 @@ fun PlanNutricionalScreen() {
                                 Text(
                                     text = "Recomendaciones Generales",
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.accentText
                                 )
                             }
                             Spacer(modifier = Modifier.height(6.dp))
@@ -255,7 +256,7 @@ fun PlanNutricionalScreen() {
                         Text(
                             text = tiempoLabel,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.accentText,
                             fontSize = 15.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))

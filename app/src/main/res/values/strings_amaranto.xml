@@ -60,4 +60,50 @@
     <string name="home_open_notificaciones">Notificaciones</string>
     <string name="profile_suscripcion">Mi suscripción</string>
     <string name="action_back">Atrás</string>
+
+    <!-- Citas: lista -->
+    <string name="citas_tab_proximas">Próximas</string>
+    <string name="citas_tab_historial">Historial</string>
+    <string name="citas_agendar">Agendar cita</string>
+    <string name="citas_vacio_proximas">No tienes citas próximas. Toca “Agendar cita” para elegir un horario.</string>
+    <string name="citas_vacio_historial">Aún no tienes citas en tu historial.</string>
+    <string name="citas_hora">%1$s h</string>
+    <string name="citas_motivo_cancelacion">Motivo: %1$s</string>
+    <string name="citas_estado_pendiente">Pendiente</string>
+    <string name="citas_estado_completada">Completada</string>
+    <string name="citas_estado_cancelada">Cancelada</string>
+    <string name="citas_estado_sin_confirmar">Sin confirmar</string>
+    <string name="citas_estado_desconocido">Sin estado</string>
+    <string name="citas_cancelar">Cancelar cita</string>
+
+    <!-- Citas: diálogo de cancelar -->
+    <string name="citas_cancelar_titulo">¿Cancelar esta cita?</string>
+    <string name="citas_cancelar_detalle">%1$s a las %2$s h. El horario quedará libre para otro paciente.</string>
+    <string name="citas_cancelar_motivo_label">Motivo (opcional)</string>
+    <string name="citas_cancelar_confirmar">Sí, cancelar</string>
+    <string name="citas_cancelar_volver">No, volver</string>
+
+    <!-- Citas: agendar -->
+    <string name="citas_agendar_titulo">Agendar cita</string>
+    <string name="citas_agendar_volver">Volver</string>
+    <string name="citas_agendar_elige_dia">Elige un día</string>
+    <string name="citas_agendar_elige_hora">Horas libres (citas de 1 hora)</string>
+    <string name="citas_agendar_sin_horarios">El nutriólogo no atiende este día. Elige otro.</string>
+    <string name="citas_agendar_sin_horas_libres">Ya no hay horas libres este día. Elige otro.</string>
+    <string name="citas_agendar_confirmar_titulo">Confirmar cita</string>
+    <string name="citas_agendar_confirmar_detalle">%1$s a las %2$s h.</string>
+    <string name="citas_agendar_confirmar">Agendar</string>
+    <string name="citas_agendar_cancelar">Cancelar</string>
+
+    <!-- Citas: mensajes propios por código HTTP -->
+    <string name="citas_msg_agendada">Cita agendada</string>
+    <string name="citas_msg_cancelada">Cita cancelada</string>
+    <string name="citas_error_horario_ocupado">Ese horario ya se ocupó, elige otro</string>
+    <string name="citas_error_horario_no_disponible">Ese horario ya no está disponible, elige otro</string>
+    <string name="citas_error_hora_pasada">Esa hora ya pasó, elige otra</string>
+    <string name="citas_error_sin_perfil">Tu cuenta no tiene perfil de paciente. Contacta a tu nutrióloga.</string>
+    <string name="citas_error_cancelar_ajena">No puedes cancelar esta cita</string>
+    <string name="citas_error_cancelar_no_existe">La cita ya no existe</string>
+    <string name="citas_error_cancelar_no_pendiente">Esta cita ya no se puede cancelar</string>
+
 </resources>

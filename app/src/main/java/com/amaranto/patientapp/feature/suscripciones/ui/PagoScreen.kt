@@ -35,6 +35,7 @@ import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
 import com.amaranto.patientapp.core.ui.theme.BadgeReadonlyBg
 import com.amaranto.patientapp.core.ui.theme.BadgeReadonlyText
+import com.amaranto.patientapp.core.ui.theme.accentText
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Plan
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Suscripcion
 
@@ -86,7 +87,7 @@ private fun PagoForm(
         Text(
             text = plan.nombre,
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.accentText
         )
         Text(
             text = stringResource(R.string.pago_total, plan.precio.toCurrencyText()),

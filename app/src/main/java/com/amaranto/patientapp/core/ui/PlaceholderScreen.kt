@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.ui.theme.accentText
 
 @Composable
 fun PlaceholderScreen(title: String, modifier: Modifier = Modifier) {
@@ -21,7 +22,7 @@ fun PlaceholderScreen(title: String, modifier: Modifier = Modifier) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.accentText
         )
         Text(
             text = stringResource(R.string.placeholder_coming_soon),

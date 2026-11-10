@@ -11,7 +11,8 @@ Aplicación nativa de Android desarrollada en **Kotlin** para pacientes del sist
 
 ## 🎨 Identidad Visual y Colores de Marca
 La aplicación adopta la paleta de colores institucional del logotipo de **Proyecto Amaranto**:
-* 🔴 **Magenta Principal (`#C2004D`):** Títulos principales, tarjetas de expedientes e inputs.
+* 🩷 **Rosa Principal (`#E876B0`):** Barras superiores, botones, tarjetas de expedientes e inputs.
+* 🌸 **Rosa Texto (`#B03A7A`):** Títulos y texto de acento (versión más oscura del rosa principal para mantener contraste legible).
 * 🟢 **Verde Hoja (`#38761D`):** Encabezados de marca, eslogan y enlaces de navegación.
 * 💖 **Rojo Coral (`#FF4B60`):** Acentos y gráficos secundarios.
 
