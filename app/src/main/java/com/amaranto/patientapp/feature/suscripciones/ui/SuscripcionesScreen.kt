@@ -39,6 +39,7 @@ import com.amaranto.patientapp.core.ui.EmptyState
 import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
 import com.amaranto.patientapp.core.ui.messageRes
+import com.amaranto.patientapp.core.ui.theme.accentText
 import com.amaranto.patientapp.feature.suscripciones.domain.model.EstadoSuscripcion
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Plan
 import com.amaranto.patientapp.feature.suscripciones.domain.model.Suscripcion
@@ -176,7 +177,7 @@ private fun SuscripcionActivaCard(
             Text(
                 text = plan?.nombre ?: stringResource(R.string.suscripciones_tu_suscripcion),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.accentText
             )
             Text(
                 text = stringResource(suscripcion.estado.labelRes()),
@@ -222,7 +223,7 @@ private fun PlanCard(plan: Plan, canContratar: Boolean, onContratar: () -> Unit)
             Text(
                 text = plan.nombre,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.accentText
             )
             Text(
                 text = stringResource(

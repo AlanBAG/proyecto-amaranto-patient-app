@@ -2,7 +2,8 @@ package com.amaranto.patientapp.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val AmarantoMagenta = Color(0xFFC2004D)
+val AmarantoPink = Color(0xFFE876B0)
+val AmarantoPinkText = Color(0xFFB03A7A)
 val BrandGreen = Color(0xFF38761D)
 val BrandGreenDark = Color(0xFF275414)
 val BrandGreenLight = Color(0xFF529E2E)
