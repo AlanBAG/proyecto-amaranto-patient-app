@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.amaranto.patientapp.R
 import com.amaranto.patientapp.core.ui.PlaceholderScreen
+import com.amaranto.patientapp.feature.citas.ui.citasGraph
 import com.amaranto.patientapp.plan.PlanNutricionalScreen
 
 @Composable
@@ -23,9 +24,10 @@ fun AmarantoNavHost(
         composable(AppDestination.PlanNutricional.route) {
             PlanNutricionalScreen()
         }
-        composable(AppDestination.Citas.route) {
-            PlaceholderScreen(stringResource(AppDestination.Citas.label))
-        }
+        citasGraph(
+            navController = navController,
+            graphRoute = AppDestination.Citas.route
+        )
         composable(AppDestination.Avances.route) {
             PlaceholderScreen(stringResource(AppDestination.Avances.label))
         }
