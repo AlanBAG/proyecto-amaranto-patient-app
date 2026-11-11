@@ -4,8 +4,9 @@ val localProps = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
+
 val debugBaseUrl: String = localProps
-    .getProperty("amaranto.baseUrl", "http://10.0.2.2:8000/")
+    .getProperty("amaranto.baseUrl", "http://10.0.2.2:8000/api/")
     .let { if (it.endsWith("/")) it else "$it/" }
 
 val useFakeData: String = localProps
@@ -18,6 +19,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -35,29 +37,20 @@ android {
     }
 
     buildTypes {
-        /*debug {
-            // 10.0.2.2 = localhost de tu PC visto desde el emulador
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
-        }*/
         debug {
+            // amaranto.baseUrl en local.properties, p. ej. http://172.17.190.75:8000/api/
             buildConfigField("String", "BASE_URL", "\"$debugBaseUrl\"")
+            buildConfigField("boolean", "USE_FAKE_DATA", useFakeData)
         }
         release {
-            // TODO: reemplazar por la URL HTTPS real del backend
-            buildConfigField("String", "BASE_URL", "\"https://CAMBIAR-POR-URL-HTTPS/\"")
+            // TODO: reemplazar por la URL HTTPS real del backend (terminada en /api/)
+            buildConfigField("String", "BASE_URL", "\"https://CAMBIAR-POR-URL-HTTPS/api/\"")
+            buildConfigField("boolean", "USE_FAKE_DATA", "false")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        debug {
-            buildConfigField("String", "BASE_URL", "\"$debugBaseUrl\"")
-            buildConfigField("boolean", "USE_FAKE_DATA", useFakeData)
-        }
-        release {
-            // ... lo que ya tienes ...
-            buildConfigField("boolean", "USE_FAKE_DATA", "false")
         }
     }
 
@@ -113,4 +106,7 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 }
