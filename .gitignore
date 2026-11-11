@@ -27,3 +27,17 @@ GoogleService-Info.plist
 
 # Logs
 *.log
+
+# Local y secretos
+*firebase-adminsdk*.json
+*service-account*.json
+
+# IDE y build
+build/
+app/build/
+
+# Archivos de apoyo (no son parte del proyecto)
+estructura*.txt
+fragmentos/
+*_FRAGMENTO.xml
+*.zip
