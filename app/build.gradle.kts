@@ -110,4 +110,7 @@ dependencies {
 
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }

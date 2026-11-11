@@ -106,4 +106,32 @@
     <string name="citas_error_cancelar_no_existe">La cita ya no existe</string>
     <string name="citas_error_cancelar_no_pendiente">Esta cita ya no se puede cancelar</string>
 
+    <!-- Recetas: lista -->
+    <string name="recetas_filtro_todas">Todas</string>
+    <string name="recetas_vacio">Aún no hay recetas disponibles.</string>
+    <string name="recetas_vacio_filtro">No hay recetas de %1$s.</string>
+    <string name="recetas_sin_foto">Sin foto</string>
+    <plurals name="recetas_num_ingredientes">
+        <item quantity="one">%d ingrediente</item>
+        <item quantity="many">%d ingredientes</item>
+        <item quantity="other">%d ingredientes</item>
+    </plurals>
+
+    <!-- Recetas: tiempos de comida -->
+    <string name="recetas_tiempo_desayuno">Desayuno</string>
+    <string name="recetas_tiempo_colacion_1">Colación 1</string>
+    <string name="recetas_tiempo_comida">Comida</string>
+    <string name="recetas_tiempo_colacion_2">Colación 2</string>
+    <string name="recetas_tiempo_cena">Cena</string>
+
+    <!-- Recetas: detalle -->
+    <string name="recetas_volver">Volver</string>
+    <string name="recetas_foto_de">Foto de %1$s</string>
+    <string name="recetas_ingredientes">Ingredientes</string>
+    <string name="recetas_sin_ingredientes">Esta receta no tiene ingredientes registrados.</string>
+    <string name="recetas_ingrediente_con_cantidad">%1$s: %2$s</string>
+    <string name="recetas_preparacion">Preparación</string>
+    <string name="recetas_sin_preparacion">Esta receta aún no tiene instrucciones de preparación.</string>
+    <string name="recetas_no_encontrada">Esta receta ya no está disponible.</string>
+
 </resources>
