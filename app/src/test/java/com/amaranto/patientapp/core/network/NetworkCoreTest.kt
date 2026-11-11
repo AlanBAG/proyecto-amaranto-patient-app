@@ -3,7 +3,6 @@ package com.amaranto.patientapp.core.network
 import com.amaranto.patientapp.core.session.FakeSessionProvider
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
@@ -17,6 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import kotlin.collections.iterator
 
 data class PingDto(val ok: Boolean?)
 
