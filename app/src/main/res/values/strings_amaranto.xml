@@ -134,4 +134,39 @@
     <string name="recetas_sin_preparacion">Esta receta aún no tiene instrucciones de preparación.</string>
     <string name="recetas_no_encontrada">Esta receta ya no está disponible.</string>
 
+    <!-- Notificaciones: pantalla -->
+    <string name="notif_titulo">Notificaciones</string>
+    <string name="notif_marcar_todas">Marcar todas como leídas</string>
+    <string name="notif_vacio">No tienes notificaciones por ahora. Aquí verás recordatorios de citas y cambios en tu plan.</string>
+    <string name="notif_titulo_generico">Notificación</string>
+
+    <!-- Notificaciones: fechas -->
+    <string name="notif_fecha_ahora">Ahora</string>
+    <plurals name="notif_fecha_hace_minutos">
+        <item quantity="one">Hace %d min</item>
+        <item quantity="many">Hace %d min</item>
+        <item quantity="other">Hace %d min</item>
+    </plurals>
+    <string name="notif_fecha_hoy">Hoy, %1$s</string>
+    <string name="notif_fecha_ayer">Ayer, %1$s</string>
+    <string name="notif_fecha_dia">%1$s, %2$s</string>
+
+    <!-- Notificaciones: badge -->
+    <plurals name="home_notificaciones_no_leidas">
+        <item quantity="one">Notificaciones: %d sin leer</item>
+        <item quantity="many">Notificaciones: %d sin leer</item>
+        <item quantity="other">Notificaciones: %d sin leer</item>
+    </plurals>
+
+    <!-- Notificaciones: canales (Ajustes del sistema) -->
+    <string name="notif_canal_citas">Citas</string>
+    <string name="notif_canal_citas_desc">Recordatorios de tus citas y cambios que haga tu nutrióloga.</string>
+    <string name="notif_canal_plan">Plan y suscripción</string>
+    <string name="notif_canal_plan_desc">Avisos cuando se asigna o actualiza tu plan y cuando tu suscripción está por vencer.</string>
+    <string name="notif_canal_general">General</string>
+    <string name="notif_canal_general_desc">Otros avisos de Proyecto Amaranto.</string>
+
+    <!-- Notificaciones: versión para la pantalla de bloqueo (sin datos de salud) -->
+    <string name="notif_publica">Tienes una notificación nueva</string>
+
 </resources>
