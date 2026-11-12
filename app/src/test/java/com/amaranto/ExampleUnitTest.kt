@@ -1,4 +1,4 @@
-package com.example.amaranto
+package com.amaranto
 
 import org.junit.Test
 
