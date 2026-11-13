@@ -15,7 +15,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object SessionModule {
 
-    // Mismo archivo de SharedPreferences que usan las Activities de tu compañero.
     @Provides
     @Singleton
     fun provideSessionManager(@ApplicationContext context: Context): SessionManager =
