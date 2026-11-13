@@ -24,9 +24,10 @@ import kotlinx.coroutines.launch
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
-    private lateinit var sessionManager: SessionManager
 
     @Inject lateinit var cerrarSesion: CerrarSesionUseCase
+
+    @Inject lateinit var sessionManager: SessionManager
 
     companion object {
         private const val TAG = "AMARANTO_APP"
@@ -36,8 +37,6 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        sessionManager = SessionManager(this)
 
         if (!sessionManager.isLoggedIn()) {
             Log.w(TAG, "Acceso sin sesión. Redirigiendo a LoginActivity...")

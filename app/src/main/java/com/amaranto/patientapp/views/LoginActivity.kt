@@ -25,9 +25,10 @@ import kotlinx.coroutines.launch
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var sessionManager: SessionManager
 
     @Inject lateinit var pushTokenRegistrar: PushTokenRegistrar
+
+    @Inject lateinit var sessionManager: SessionManager
 
     companion object {
         private const val TAG = "AMARANTO_APP"
@@ -37,8 +38,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        sessionManager = SessionManager(this)
 
         // Si ya existe una sesión activa, redirige automáticamente al Home
         if (sessionManager.isLoggedIn()) {
