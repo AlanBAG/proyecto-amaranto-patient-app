@@ -169,4 +169,36 @@
     <!-- Notificaciones: versión para la pantalla de bloqueo (sin datos de salud) -->
     <string name="notif_publica">Tienes una notificación nueva</string>
 
+    <!-- Avances: estados -->
+    <string name="avances_vacio">Aún no tienes consultas registradas. Aquí verás tu progreso después de tu primera consulta.</string>
+    <string name="avances_error_sin_paciente">Tu cuenta no tiene registro de paciente. Contacta a tu nutrióloga.</string>
+
+    <!-- Avances: medidas y unidades -->
+    <string name="avances_medida_peso">Peso</string>
+    <string name="avances_medida_imc">IMC</string>
+    <string name="avances_medida_cintura">Cintura</string>
+    <string name="avances_medida_cadera">Cadera</string>
+    <string name="avances_medida_grasa">% grasa</string>
+    <string name="avances_medida_musculo">Masa muscular</string>
+    <string name="avances_medida_icc">ICC</string>
+    <string name="avances_medida_masa_grasa">Masa grasa</string>
+    <string name="avances_unidad_kg">kg</string>
+    <string name="avances_unidad_imc">kg/m²</string>
+    <string name="avances_unidad_cm">cm</string>
+    <string name="avances_unidad_porcentaje">%</string>
+
+    <!-- Avances: gráfica -->
+    <string name="avances_grafica_titulo">%1$s (%2$s)</string>
+    <string name="avances_sin_datos_medida">Tu nutrióloga aún no ha registrado %1$s en tus consultas.</string>
+    <string name="avances_sin_evolucion">Con una sola consulta todavía no hay evolución.</string>
+    <string name="avances_cambio">Cambio desde tu primera consulta: %1$s %2$s</string>
+    <string name="avances_grafica_desc">Gráfica de %1$s: de %2$s %3$s el %4$s a %5$s %3$s el %6$s.</string>
+    <string name="avances_grafica_desc_uno">Gráfica de %1$s: %2$s %3$s el %4$s.</string>
+
+    <!-- Avances: historial -->
+    <string name="avances_historial">Historial de consultas</string>
+    <string name="avances_consulta_titulo">Evaluación %1$d · %2$s</string>
+    <string name="avances_sin_fecha">Sin fecha</string>
+    <string name="avances_sin_valor">—</string>
+
 </resources>
