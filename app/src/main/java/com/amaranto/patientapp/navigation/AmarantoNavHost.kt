@@ -2,11 +2,10 @@ package com.amaranto.patientapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.amaranto.patientapp.core.ui.PlaceholderScreen
+import com.amaranto.patientapp.feature.avances.ui.AvancesRoute
 import com.amaranto.patientapp.feature.citas.ui.citasGraph
 import com.amaranto.patientapp.feature.notificaciones.domain.model.DestinoNotificacion
 import com.amaranto.patientapp.feature.notificaciones.ui.NotificacionesRoute
@@ -32,7 +31,7 @@ fun AmarantoNavHost(
             graphRoute = AppDestination.Citas.route
         )
         composable(AppDestination.Avances.route) {
-            PlaceholderScreen(stringResource(AppDestination.Avances.label))
+            AvancesRoute()
         }
         recetasGraph(
             navController = navController,
