@@ -2,6 +2,9 @@ package com.amaranto.patientapp.home
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Badge
@@ -79,16 +82,33 @@ fun HomeScreen(
 
     NotificationPermissionEffect()
 
+    // Notificaciones es una pantalla secundaria: barra superior con "volver" y sin barra inferior.
+    val enNotificaciones = backStackEntry?.destination?.route == AppRoutes.NOTIFICACIONES
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = {
+                    Text(stringResource(if (enNotificaciones) R.string.notif_titulo else R.string.app_name))
+                },
+                navigationIcon = {
+                    if (enNotificaciones) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.notif_volver)
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 actions = {
+                    if (enNotificaciones) return@TopAppBar
                     IconButton(onClick = {
                         navController.navigate(AppRoutes.NOTIFICACIONES) { launchSingleTop = true }
                     }) {
@@ -119,15 +139,26 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                AppDestination.entries.forEach { destination ->
-                    NavigationBarItem(
-                        selected = backStackEntry?.destination?.hierarchy
-                            ?.any { it.route == destination.route } == true,
-                        onClick = { navController.navegarATab(destination.route) },
-                        icon = { Icon(destination.icon, contentDescription = null) },
-                        label = { Text(stringResource(destination.label)) }
-                    )
+            if (!enNotificaciones) {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+                    AppDestination.entries.forEach { destination ->
+                        NavigationBarItem(
+                            selected = backStackEntry?.destination?.hierarchy
+                                ?.any { it.route == destination.route } == true,
+                            onClick = { navController.navegarATab(destination.route) },
+                            icon = { Icon(destination.icon, contentDescription = null) },
+                            // Una sola línea y centrada: si una etiqueta ocupa 2 líneas, su ícono sube y la barra se desalinea.
+                            label = {
+                                Text(
+                                    text = stringResource(destination.navLabel),
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

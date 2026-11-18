@@ -11,6 +11,51 @@
     <string name="error_server">El servidor tuvo un problema. Inténtalo más tarde.</string>
     <string name="error_unknown">Ocurrió un error inesperado.</string>
 
+    <!-- Plan Nutricional -->
+    <string name="plan_titulo_default">Mi Plan Nutricional</string>
+    <string name="plan_vacio">Aún no tienes un plan asignado. Tu nutrióloga lo publicará después de tu consulta.</string>
+    <string name="plan_recomendaciones">Recomendaciones Generales</string>
+    <string name="plan_hidratacion_titulo">Meta de Hidratación Recomendada</string>
+    <string name="plan_hidratacion_detalle">%1$s ml de agua por kg de peso corporal al día</string>
+    <string name="plan_menu_semanal">Menú Semanal</string>
+    <string name="plan_dia_lunes">Lunes</string>
+    <string name="plan_dia_martes">Martes</string>
+    <string name="plan_dia_miercoles">Miércoles</string>
+    <string name="plan_dia_jueves">Jueves</string>
+    <string name="plan_dia_viernes">Viernes</string>
+    <string name="plan_dia_sabado">Sábado</string>
+    <string name="plan_dia_domingo">Domingo</string>
+    <string name="plan_tiempo_desayuno">🌅 Desayuno</string>
+    <string name="plan_tiempo_colacion_1">🍏 Colación 1</string>
+    <string name="plan_tiempo_comida">🍲 Comida</string>
+    <string name="plan_tiempo_colacion_2">🍐 Colación 2</string>
+    <string name="plan_tiempo_cena">🌙 Cena</string>
+    <string name="plan_receta_asignada">Receta asignada</string>
+    <string name="plan_toca_para_ver">👉 Toca para ver ingredientes y preparación</string>
+    <string name="plan_sin_receta">Sin receta programada para este tiempo</string>
+    <string name="plan_detalle_receta">Detalle de Receta</string>
+    <string name="plan_ingredientes">🥗 Ingredientes:</string>
+    <string name="plan_preparacion">🍳 Preparación:</string>
+    <string name="plan_cerrar">Cerrar</string>
+
+    <!-- Perfil / Expediente -->
+    <string name="perfil_volver">Volver</string>
+    <string name="perfil_nombre_default">Paciente</string>
+    <string name="perfil_usuario">Usuario: %1$s</string>
+    <string name="perfil_seccion_diagnostico">🩺 Diagnóstico</string>
+    <string name="perfil_seccion_meta">🎯 Meta y tratamiento</string>
+    <string name="perfil_seccion_habitos">🍏 Hábitos y recomendaciones</string>
+    <string name="perfil_seccion_observaciones">📝 Observaciones</string>
+    <string name="perfil_seccion_expediente">📋 Expediente clínico</string>
+    <string name="perfil_sin_expediente">Aún no tienes un historial clínico activo. Tu nutrióloga lo completará en tu consulta.</string>
+    <string name="perfil_cerrar_sesion">Cerrar sesión</string>
+    <string name="perfil_cerrar_titulo">¿Cerrar sesión?</string>
+    <string name="perfil_cerrar_texto">Dejarás de recibir notificaciones en este teléfono hasta que vuelvas a iniciar sesión.</string>
+    <string name="perfil_cerrar_cancelar">Cancelar</string>
+    <string name="perfil_sesion_cerrada">Sesión cerrada correctamente</string>
+    <string name="perfil_sesion_expirada">Tu sesión expiró. Inicia sesión de nuevo.</string>
+
+
     <!-- Suscripciones -->
     <string name="suscripciones_tu_suscripcion">Tu suscripción</string>
     <string name="suscripciones_vigencia">Vigente del %1$s al %2$s</string>
@@ -139,6 +184,7 @@
     <string name="notif_marcar_todas">Marcar todas como leídas</string>
     <string name="notif_vacio">No tienes notificaciones por ahora. Aquí verás recordatorios de citas y cambios en tu plan.</string>
     <string name="notif_titulo_generico">Notificación</string>
+    <string name="notif_volver">Volver</string>
 
     <!-- Notificaciones: fechas -->
     <string name="notif_fecha_ahora">Ahora</string>
@@ -200,5 +246,8 @@
     <string name="avances_consulta_titulo">Evaluación %1$d · %2$s</string>
     <string name="avances_sin_fecha">Sin fecha</string>
     <string name="avances_sin_valor">—</string>
+
+    <!-- Notificaciones: botón de volver en la barra superior -->
+    <string name="nav_plan_corto">Plan</string>
 
 </resources>
