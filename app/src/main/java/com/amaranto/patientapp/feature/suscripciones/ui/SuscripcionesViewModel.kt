@@ -22,6 +22,8 @@ import kotlinx.coroutines.launch
 
 data class SuscripcionesUiState(
     val isLoading: Boolean = true,
+    /** Actualización con datos ya en pantalla (deslizar hacia abajo). */
+    val isRefreshing: Boolean = false,
     val hasLoaded: Boolean = false,
     val planes: List<Plan> = emptyList(),
     val suscripcionActiva: Suscripcion? = null,
@@ -49,12 +51,20 @@ class SuscripcionesViewModel @Inject constructor(
 
     private var loadJob: Job? = null
 
-    /** Se llama en cada ON_RESUME de la pantalla. Solo muestra "cargando" la primera vez. */
-    fun refresh() {
+    /**
+     * Se llama en cada ON_RESUME y al deslizar hacia abajo. Solo muestra "cargando" la primera vez.
+     * [fromPull] = true solo cuando lo pide el usuario: muestra el indicador de actualización.
+     * (En ON_RESUME se actualiza en silencio para no mostrar el indicador cada vez que se vuelve.)
+     */
+    fun refresh(fromPull: Boolean = false) {
         if (loadJob?.isActive == true) return
         loadJob = viewModelScope.launch {
             val hadData = _uiState.value.hasLoaded
-            if (!hadData) _uiState.update { it.copy(isLoading = true, error = null) }
+            if (!hadData) {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            } else if (fromPull) {
+                _uiState.update { it.copy(isRefreshing = true) }
+            }
 
             val (planesResult, activaResult) = coroutineScope {
                 val planes = async { repository.getPlanes() }
@@ -68,6 +78,7 @@ class SuscripcionesViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isRefreshing = false,
                         hasLoaded = true,
                         error = null,
                         planes = planes,
@@ -81,9 +92,10 @@ class SuscripcionesViewModel @Inject constructor(
                     .filterIsInstance<ApiResult.Failure>()
                     .first().error
                 if (hadData) {
+                    _uiState.update { it.copy(isRefreshing = false) }
                     _events.send(SuscripcionesEvent.ShowError(error))
                 } else {
-                    _uiState.update { it.copy(isLoading = false, error = error) }
+                    _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
                 }
             }
         }
