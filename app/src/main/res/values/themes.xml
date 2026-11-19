@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema Principal de la Aplicación -->
-    <style name="Theme.Amaranto" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!--
+        Tema Principal de la Aplicación.
+        Siempre claro: la paleta de Brisa solo tiene versión clara. Con DayNight, en modo oscuro las
+        pantallas de Views (Login, Registro) tomaban superficies oscuras con texto oscuro.
+        Las pantallas Compose usan AmarantoTheme (lightColorScheme), que ya era siempre claro.
+    -->
+    <style name="Theme.Amaranto" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Colores primarios de la marca Amaranto -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
@@ -10,7 +15,7 @@
         <item name="colorSecondary">@color/accent</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Fondo de la pantalla -->
-        <item name="android:statusBarColor">@color/primary_dark</item>
         <item name="android:windowBackground">@color/background</item>
+        <!-- android:statusBarColor se quitó: con targetSdk 35 la app es edge-to-edge y Android lo ignora. -->
     </style>
 </resources>

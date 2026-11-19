@@ -48,7 +48,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
 import com.amaranto.patientapp.core.ui.EmptyState
+import com.amaranto.patientapp.core.ui.RefreshableFill
 import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
 import com.amaranto.patientapp.feature.citas.domain.esCancelable
@@ -137,21 +139,18 @@ fun CitasScreen(
                     text = { Text(stringResource(R.string.citas_tab_historial)) }
                 )
             }
-            if (state.isRefreshing) {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
-            }
-
             when {
                 state.isLoading -> LoadingState()
-                state.error != null -> ErrorState(error = state.error, onRetry = onRetry)
-                else -> {
+                else -> AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = onRetry) {
                     val citas = if (tab == 0) state.proximas else state.historial
-                    if (citas.isEmpty()) {
-                        EmptyState(
-                            stringResource(if (tab == 0) R.string.citas_vacio_proximas else R.string.citas_vacio_historial)
-                        )
-                    } else {
-                        CitasList(
+                    when {
+                        state.error != null -> RefreshableFill { ErrorState(error = state.error, onRetry = onRetry) }
+                        citas.isEmpty() -> RefreshableFill {
+                            EmptyState(
+                                stringResource(if (tab == 0) R.string.citas_vacio_proximas else R.string.citas_vacio_historial)
+                            )
+                        }
+                        else -> CitasList(
                             citas = citas,
                             ahora = state.ahora,
                             onCancelarClick = onCancelarClick

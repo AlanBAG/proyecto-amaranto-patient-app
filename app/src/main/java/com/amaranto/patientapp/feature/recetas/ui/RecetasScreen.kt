@@ -26,9 +26,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
 import com.amaranto.patientapp.core.ui.EmptyState
 import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
+import com.amaranto.patientapp.core.ui.RefreshableFill
+import com.amaranto.patientapp.core.ui.messageRes
 import com.amaranto.patientapp.feature.recetas.domain.model.Receta
 import com.amaranto.patientapp.feature.recetas.domain.model.TiempoComida
 
@@ -53,31 +56,46 @@ fun RecetasScreen(
     onFiltroClick: (TiempoComida?) -> Unit,
     onRecetaClick: (String) -> Unit
 ) {
-    when {
-        state.isLoading -> LoadingState()
-        state.error != null -> ErrorState(error = state.error, onRetry = onRetry)
-        state.todas.isEmpty() -> EmptyState(stringResource(R.string.recetas_vacio))
-        else -> Column(Modifier.fillMaxSize()) {
-            if (state.tiempos.isNotEmpty()) {
-                FiltrosRow(
-                    tiempos = state.tiempos,
-                    seleccionado = state.filtro,
-                    onFiltroClick = onFiltroClick
-                )
-            }
-            val visibles = state.visibles
-            if (visibles.isEmpty()) {
-                // Solo pasa si el filtro quedó sin recetas; refresh() lo corrige, esto es por seguridad.
-                val nombre = state.filtro?.let { stringResource(it.labelRes()) }.orEmpty()
-                EmptyState(stringResource(R.string.recetas_vacio_filtro, nombre))
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(visibles, key = { it.id }) { receta ->
-                        RecetaCard(receta = receta, onClick = { onRecetaClick(receta.id) })
+    if (state.isLoading) {
+        LoadingState()
+        return
+    }
+    AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = onRetry) {
+        when {
+            state.error != null && state.todas.isEmpty() ->
+                RefreshableFill { ErrorState(error = state.error, onRetry = onRetry) }
+            state.todas.isEmpty() -> RefreshableFill { EmptyState(stringResource(R.string.recetas_vacio)) }
+            else -> Column(Modifier.fillMaxSize()) {
+                // Falló un refresh pero hay recetas: se avisa sin quitarlas.
+                state.error?.let { error ->
+                    Text(
+                        text = stringResource(error.messageRes()),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                    )
+                }
+                if (state.tiempos.isNotEmpty()) {
+                    FiltrosRow(
+                        tiempos = state.tiempos,
+                        seleccionado = state.filtro,
+                        onFiltroClick = onFiltroClick
+                    )
+                }
+                val visibles = state.visibles
+                if (visibles.isEmpty()) {
+                    // Solo pasa si el filtro quedó sin recetas; refresh() lo corrige, esto es por seguridad.
+                    val nombre = state.filtro?.let { stringResource(it.labelRes()) }.orEmpty()
+                    RefreshableFill { EmptyState(stringResource(R.string.recetas_vacio_filtro, nombre)) }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(visibles, key = { it.id }) { receta ->
+                            RecetaCard(receta = receta, onClick = { onRecetaClick(receta.id) })
+                        }
                     }
                 }
             }

@@ -1,7 +1,18 @@
 package com.amaranto.patientapp.plan
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -9,311 +20,262 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.amaranto.patientapp.api.RetrofitClient
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.network.AppError
+import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
+import com.amaranto.patientapp.core.ui.EmptyState
+import com.amaranto.patientapp.core.ui.ErrorState
+import com.amaranto.patientapp.core.ui.LoadingState
+import com.amaranto.patientapp.core.ui.RefreshableFill
+import com.amaranto.patientapp.core.ui.messageRes
 import com.amaranto.patientapp.core.ui.theme.accentText
-import com.amaranto.patientapp.models.IngredienteItem
-import com.amaranto.patientapp.models.PlanNutricionalResponse
 import com.amaranto.patientapp.models.RecetaResponse
-import com.amaranto.patientapp.utils.SessionManager
-import kotlinx.coroutines.launch
+
+private val diasSemana = listOf(
+    "lunes" to R.string.plan_dia_lunes,
+    "martes" to R.string.plan_dia_martes,
+    "miercoles" to R.string.plan_dia_miercoles,
+    "jueves" to R.string.plan_dia_jueves,
+    "viernes" to R.string.plan_dia_viernes,
+    "sabado" to R.string.plan_dia_sabado,
+    "domingo" to R.string.plan_dia_domingo
+)
+
+private val tiemposComida = listOf(
+    "desayuno" to R.string.plan_tiempo_desayuno,
+    "colacion_1" to R.string.plan_tiempo_colacion_1,
+    "comida" to R.string.plan_tiempo_comida,
+    "colacion_2" to R.string.plan_tiempo_colacion_2,
+    "cena" to R.string.plan_tiempo_cena
+)
 
 @Composable
-fun PlanNutricionalScreen() {
-    val context = LocalContext.current
-    val sessionManager = remember { SessionManager(context) }
-    val scope = rememberCoroutineScope()
+fun PlanNutricionalScreen(viewModel: PlanNutricionalViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var isLoading by remember { mutableStateOf(true) }
-    var planNutricional by remember { mutableStateOf<PlanNutricionalResponse?>(null) }
-    var recetasMap by remember { mutableStateOf<Map<String, RecetaResponse>>(emptyMap()) }
-    var selectedDia by remember { mutableStateOf("lunes") }
-    var recetaDetalleSeleccionada by remember { mutableStateOf<RecetaResponse?>(null) }
-
-    val diasSemana = listOf(
-        "lunes" to "Lunes",
-        "martes" to "Martes",
-        "miercoles" to "Miércoles",
-        "jueves" to "Jueves",
-        "viernes" to "Viernes",
-        "sabado" to "Sábado",
-        "domingo" to "Domingo"
-    )
-
-    val tiemposComida = listOf(
-        "desayuno" to "🌅 Desayuno",
-        "colacion_1" to "🍏 Colación 1",
-        "comida" to "🍲 Comida",
-        "colacion_2" to "🍐 Colación 2",
-        "cena" to "🌙 Cena"
-    )
-
-    // Carga de datos al iniciar el Composable
-    LaunchedEffect(Unit) {
-        val token = sessionManager.fetchAuthToken()
-
-        if (token.isNullOrEmpty() && !RetrofitClient.USE_MOCK_DATA) {
-            isLoading = false
-            return@LaunchedEffect
-        }
-
-        scope.launch {
-            try {
-                val authToken = token ?: "Bearer mock_token"
-                val responsePlanes = RetrofitClient.apiService.getMisPlanes(authToken)
-
-                if (responsePlanes.isSuccessful && !responsePlanes.body().isNullOrEmpty()) {
-                    planNutricional = responsePlanes.body()!!.first()
-                } else if (RetrofitClient.USE_MOCK_DATA) {
-                    // Datos de respaldo para el modo de prueba o si la lista viene vacía
-                    planNutricional = PlanNutricionalResponse(
-                        id = "6ad2be13bce9c1dacd0ff122",
-                        nombre = "Plan Nutricional de Salud y Balance",
-                        estado = "guardado",
-                        aguaMlPorKg = 35.0,
-                        recomendaciones = "Evitar lácteos enteros, reducir refrescos y sal. Caminar al menos 30 minutos al día.",
-                        menuSemanal = mapOf(
-                            "lunes" to mapOf("desayuno" to "receta_1", "comida" to "receta_2", "cena" to "receta_3"),
-                            "miercoles" to mapOf("desayuno" to "receta_1", "colacion_1" to "receta_4")
+    when {
+        state.isLoading -> LoadingState()
+        else -> AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = viewModel::refresh) {
+            when {
+                state.isLoading -> LoadingState()
+                else -> AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = viewModel::refresh) {
+                    // Copias locales: `state` es delegada (by) y no permite smart cast.
+                    val plan = state.plan
+                    val error = state.error
+                    when {
+                        error != null && !state.hasLoaded ->
+                            RefreshableFill { ErrorState(error = error, onRetry = viewModel::refresh) }
+                        plan == null -> RefreshableFill { EmptyState(stringResource(R.string.plan_vacio)) }
+                        else -> PlanContent(
+                            state = state,
+                            onDiaClick = viewModel::onDiaClick,
+                            onRecetaClick = viewModel::onRecetaClick
                         )
-                    )
+                    }
                 }
-
-                // Cargar catálogo de recetas
-                val responseRecetas = RetrofitClient.apiService.getRecetas(authToken)
-                if (responseRecetas.isSuccessful && !responseRecetas.body().isNullOrEmpty()) {
-                    recetasMap = responseRecetas.body()!!.associateBy { it.recetaId }
-                } else {
-                    // Recetas de prueba integradas
-                    recetasMap = mapOf(
-                        "receta_1" to RecetaResponse(
-                            id = "receta_1",
-                            nombre = "Chilaquiles rojos con huevo",
-                            tiempoComida = "desayuno",
-                            preparacion = "Freír las tortillas de maíz en sartén sin aceite en exceso, bañar con salsa roja casera y servir con 1 huevo estrellado.",
-                            ingredientes = listOf(
-                                IngredienteItem("Tortilla de maíz", "2 piezas"),
-                                IngredienteItem("Huevo", "1 pieza"),
-                                IngredienteItem("Salsa roja casera", "1/2 taza")
-                            )
-                        ),
-                        "receta_2" to RecetaResponse(
-                            id = "receta_2",
-                            nombre = "Pechuga de pollo a la plancha con ensalada",
-                            tiempoComida = "comida",
-                            preparacion = "Sazonar la pechuga con pimienta y ajo. Asar a la plancha y acompañar con ensalada de lechuga, jitomate y aguacate.",
-                            ingredientes = listOf(
-                                IngredienteItem("Pechuga de pollo", "150 gr"),
-                                IngredienteItem("Ensalada verde con jitomate", "1 taza"),
-                                IngredienteItem("Aguacate", "1/4 pieza")
-                            )
-                        ),
-                        "receta_3" to RecetaResponse(
-                            id = "receta_3",
-                            nombre = "Cena ligera: Sopa de verduras y té de manzanilla",
-                            tiempoComida = "cena",
-                            preparacion = "Hervir calabacita, zanahoria y espinaca en caldo de pollo desgrasado.",
-                            ingredientes = listOf(
-                                IngredienteItem("Sopa de verduras mixtas", "1 bowl"),
-                                IngredienteItem("Té de manzanilla", "1 taza")
-                            )
-                        )
-                    )
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                isLoading = false
             }
         }
     }
 
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        return
+    state.recetaDetalle?.let { receta ->
+        RecetaDetalleDialog(receta = receta, onDismiss = viewModel::onRecetaDismiss)
     }
+}
 
-    Scaffold { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Título de la Sección
-            item {
-                Text(
-                    text = planNutricional?.nombre ?: "Mi Plan Nutricional",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.accentText
-                )
+/**
+ * Sin Scaffold propio: el Scaffold de Home ya aplica los espacios de las barras del sistema.
+ * Antes había un Scaffold dentro de otro y ese espacio se aplicaba dos veces (el hueco en blanco).
+ * contentPadding en lugar de padding: las tarjetas se deslizan hasta el borde sin dejar una franja fija.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun PlanContent(
+    state: PlanUiState,
+    onDiaClick: (String) -> Unit,
+    onRecetaClick: (RecetaResponse) -> Unit
+) {
+    val plan = state.plan ?: return
+    val menuDia = plan.menuSemanal?.get(state.diaSeleccionado) ?: emptyMap()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Título fijo arriba mientras se desplaza la pantalla.
+        stickyHeader(key = "titulo") {
+            Text(
+                text = plan.nombre ?: stringResource(R.string.plan_titulo_default),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.accentText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(top = 16.dp, bottom = 8.dp)
+            )
+        }
+
+        // Falló una actualización pero hay datos: se avisa sin quitarlos.
+        state.error?.let { error ->
+            item(key = "error") { ErrorBanner(error) }
+        }
+
+        plan.recomendaciones?.takeIf { it.isNotBlank() }?.let { recs ->
+            item(key = "recomendaciones") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.plan_recomendaciones),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.accentText
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(text = recs, fontSize = 14.sp)
+                    }
+                }
             }
+        }
 
-            // Card de Recomendaciones del Nutriólogo
-            planNutricional?.recomendaciones?.let { recs ->
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Recomendaciones Generales",
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.accentText
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(text = recs, fontSize = 14.sp)
+        plan.aguaMlPorKg?.let { agua ->
+            item(key = "hidratacion") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(stringResource(R.string.plan_hidratacion_titulo), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(stringResource(R.string.plan_hidratacion_detalle, agua.toString()), fontSize = 13.sp)
                         }
                     }
                 }
             }
+        }
 
-            // Card de Hidratación
-            planNutricional?.aguaMlPorKg?.let { agua ->
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    text = "Meta de Hidratación Recomendada",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                )
-                                Text(
-                                    text = "$agua ml de agua por kg de peso corporal al día",
-                                    fontSize = 13.sp
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Selector de Días de la Semana
-            item {
+        item(key = "dias") {
+            Column {
                 Text(
-                    text = "Menú Semanal",
+                    text = stringResource(R.string.plan_menu_semanal),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(diasSemana) { (key, label) ->
-                        val isSelected = selectedDia == key
+                    items(diasSemana, key = { it.first }) { (key, labelRes) ->
                         FilterChip(
-                            selected = isSelected,
-                            onClick = { selectedDia = key },
-                            label = { Text(label) }
+                            selected = state.diaSeleccionado == key,
+                            onClick = { onDiaClick(key) },
+                            label = { Text(stringResource(labelRes)) }
                         )
                     }
                 }
             }
+        }
 
-            // Tiempos de Comida para el día seleccionado
-            val menuDia = planNutricional?.menuSemanal?.get(selectedDia) ?: emptyMap()
-
-            items(tiemposComida) { (tiempoKey, tiempoLabel) ->
-                val recetaId = menuDia[tiempoKey]
-                val receta = recetasMap[recetaId]
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(enabled = receta != null) {
-                            recetaDetalleSeleccionada = receta
-                        },
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
+        items(tiemposComida, key = { it.first }) { (tiempoKey, tiempoLabelRes) ->
+            val receta = state.recetas[menuDia[tiempoKey]]
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = receta != null) { receta?.let(onRecetaClick) },
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = stringResource(tiempoLabelRes),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.accentText,
+                        fontSize = 15.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if (receta != null) {
                         Text(
-                            text = tiempoLabel,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.accentText,
-                            fontSize = 15.sp
+                            text = receta.nombre ?: stringResource(R.string.plan_receta_asignada),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        if (receta != null) {
-                            Text(
-                                text = receta.nombre ?: "Receta asignada",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "👉 Toca para ver ingredientes y preparación",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        } else {
-                            Text(
-                                text = "Sin receta programada para este tiempo",
-                                fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
-                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = stringResource(R.string.plan_toca_para_ver),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.plan_sin_receta),
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
                     }
                 }
             }
         }
     }
+}
 
-    // Modal / Diálogo de Detalle de Receta al presionar sobre ella
-    recetaDetalleSeleccionada?.let { receta ->
-        AlertDialog(
-            onDismissRequest = { recetaDetalleSeleccionada = null },
-            title = {
-                Text(
-                    text = receta.nombre ?: "Detalle de Receta",
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (!receta.ingredientes.isNullOrEmpty()) {
-                        Text(text = "🥗 Ingredientes:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        receta.ingredientes.forEach { ing ->
-                            Text(text = "• ${ing.nombre}: ${ing.cantidad}", fontSize = 13.sp)
-                        }
-                    }
-                    if (!receta.preparacion.isNullOrBlank()) {
-                        Text(text = "🍳 Preparación:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        Text(text = receta.preparacion, fontSize = 13.sp)
+@Composable
+private fun ErrorBanner(error: AppError) {
+    Text(
+        text = stringResource(error.messageRes()),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.error
+    )
+}
+
+@Composable
+private fun RecetaDetalleDialog(receta: RecetaResponse, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = receta.nombre ?: stringResource(R.string.plan_detalle_receta), fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (!receta.ingredientes.isNullOrEmpty()) {
+                    Text(stringResource(R.string.plan_ingredientes), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    receta.ingredientes.forEach { ing ->
+                        Text(text = "• ${ing.nombre}: ${ing.cantidad}", fontSize = 13.sp)
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { recetaDetalleSeleccionada = null }) {
-                    Text("Cerrar")
+                if (!receta.preparacion.isNullOrBlank()) {
+                    Text(stringResource(R.string.plan_preparacion), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(text = receta.preparacion, fontSize = 13.sp)
                 }
             }
-        )
-    }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.plan_cerrar)) }
+        }
+    )
 }

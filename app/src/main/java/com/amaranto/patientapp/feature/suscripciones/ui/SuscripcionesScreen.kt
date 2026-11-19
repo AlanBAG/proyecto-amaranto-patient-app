@@ -35,9 +35,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
 import com.amaranto.patientapp.core.ui.EmptyState
 import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
+import com.amaranto.patientapp.core.ui.RefreshableFill
 import com.amaranto.patientapp.core.ui.messageRes
 import com.amaranto.patientapp.core.ui.theme.accentText
 import com.amaranto.patientapp.feature.suscripciones.domain.model.EstadoSuscripcion
@@ -70,7 +72,7 @@ fun SuscripcionesRoute(
     SuscripcionesScreen(
         state = state,
         snackbarHostState = snackbarHostState,
-        onRetry = viewModel::refresh,
+        onRetry = { viewModel.refresh(fromPull = true) },
         onContratar = onContratar,
         onCancelClick = viewModel::onCancelClick,
         onCancelDismiss = viewModel::onCancelDismiss,
@@ -89,46 +91,50 @@ fun SuscripcionesScreen(
     onCancelConfirm: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
-        when {
-            state.isLoading -> LoadingState()
-            state.error != null -> ErrorState(error = state.error, onRetry = onRetry)
-            state.planes.isEmpty() && state.suscripcionActiva == null ->
-                EmptyState(stringResource(R.string.suscripciones_vacio))
-            else -> LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                state.suscripcionActiva?.let { suscripcion ->
-                    item {
-                        SuscripcionActivaCard(
-                            suscripcion = suscripcion,
-                            plan = state.planActivo,
-                            isCancelling = state.isCancelling,
-                            onCancelClick = onCancelClick
-                        )
-                    }
-                }
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            text = stringResource(R.string.suscripciones_planes_disponibles),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        if (state.suscripcionActiva != null) {
-                            Text(
-                                text = stringResource(R.string.suscripciones_ya_activa_aviso),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+        if (state.isLoading) {
+            LoadingState()
+        } else AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = onRetry) {
+            when {
+                state.error != null -> RefreshableFill { ErrorState(error = state.error, onRetry = onRetry) }
+                state.planes.isEmpty() && state.suscripcionActiva == null ->
+                    RefreshableFill { EmptyState(stringResource(R.string.suscripciones_vacio)) }
+                else -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    state.suscripcionActiva?.let { suscripcion ->
+                        item {
+                            SuscripcionActivaCard(
+                                suscripcion = suscripcion,
+                                plan = state.planActivo,
+                                isCancelling = state.isCancelling,
+                                onCancelClick = onCancelClick
                             )
                         }
                     }
-                }
-                items(state.planes, key = { it.id }) { plan ->
-                    PlanCard(
-                        plan = plan,
-                        canContratar = state.suscripcionActiva == null,
-                        onContratar = { onContratar(plan.id) }
-                    )
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = stringResource(R.string.suscripciones_planes_disponibles),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            if (state.suscripcionActiva != null) {
+                                Text(
+                                    text = stringResource(R.string.suscripciones_ya_activa_aviso),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    items(state.planes, key = { it.id }) { plan ->
+                        PlanCard(
+                            plan = plan,
+                            canContratar = state.suscripcionActiva == null,
+                            onContratar = { onContratar(plan.id) }
+                        )
+                    }
                 }
             }
         }

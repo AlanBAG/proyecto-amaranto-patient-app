@@ -39,7 +39,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amaranto.patientapp.R
+import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
 import com.amaranto.patientapp.core.ui.EmptyState
+import com.amaranto.patientapp.core.ui.RefreshableFill
 import com.amaranto.patientapp.core.ui.ErrorState
 import com.amaranto.patientapp.core.ui.LoadingState
 import com.amaranto.patientapp.feature.notificaciones.domain.fechaRelativa
@@ -89,12 +91,12 @@ fun NotificacionesScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
+            // El título y "volver" están en la barra superior de Home; aquí solo la acción.
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(end = 8.dp, top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.End
             ) {
-                Text(stringResource(R.string.notif_titulo), style = MaterialTheme.typography.titleLarge)
                 TextButton(
                     onClick = onMarcarTodas,
                     enabled = state.hayNoLeidas && !state.isMarcandoTodas
@@ -102,25 +104,29 @@ fun NotificacionesScreen(
                     Text(stringResource(R.string.notif_marcar_todas))
                 }
             }
-            if (state.isRefreshing || state.isMarcandoTodas) {
+            if (state.isMarcandoTodas) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
 
             when {
                 state.isLoading -> LoadingState()
-                state.error != null -> ErrorState(error = state.error, onRetry = onRetry)
-                state.notificaciones.isEmpty() -> EmptyState(stringResource(R.string.notif_vacio))
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    items(state.notificaciones, key = { it.id }) { notificacion ->
-                        NotificacionItem(
-                            notificacion = notificacion,
-                            ahora = state.ahora,
-                            onClick = { onNotificacionClick(notificacion) }
-                        )
-                        HorizontalDivider()
+                else -> AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = onRetry) {
+                    when {
+                        state.error != null -> RefreshableFill { ErrorState(error = state.error, onRetry = onRetry) }
+                        state.notificaciones.isEmpty() -> RefreshableFill { EmptyState(stringResource(R.string.notif_vacio)) }
+                        else -> LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 16.dp)
+                        ) {
+                            items(state.notificaciones, key = { it.id }) { notificacion ->
+                                NotificacionItem(
+                                    notificacion = notificacion,
+                                    ahora = state.ahora,
+                                    onClick = { onNotificacionClick(notificacion) }
+                                )
+                                HorizontalDivider()
+                            }
+                        }
                     }
                 }
             }

@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 
 data class RecetasUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val error: AppError? = null,
     val todas: List<Receta> = emptyList(),
     /** null = "Todas". */
@@ -43,21 +44,27 @@ class RecetasViewModel @Inject constructor(
         refresh()
     }
 
+    /** Con recetas ya mostradas (pull-to-refresh) no se cambia a la pantalla de carga completa. */
     fun refresh() {
         loadJob?.cancel()
-        _uiState.update { it.copy(isLoading = true, error = null) }
+        val hayContenido = _uiState.value.todas.isNotEmpty()
+        _uiState.update { it.copy(isLoading = !hayContenido, isRefreshing = hayContenido, error = null) }
         loadJob = viewModelScope.launch {
             when (val result = repository.getRecetas()) {
                 is ApiResult.Success -> _uiState.update { state ->
                     val tiempos = tiemposDisponibles(result.data)
                     state.copy(
                         isLoading = false,
+                        isRefreshing = false,
                         todas = result.data,
                         // Si el filtro elegido ya no tiene recetas, vuelve a "Todas".
                         filtro = state.filtro?.takeIf { it in tiempos }
                     )
                 }
-                is ApiResult.Failure -> _uiState.update { it.copy(isLoading = false, error = result.error) }
+                // Si falla un refresh con recetas en pantalla, se conservan y se muestra el error arriba.
+                is ApiResult.Failure -> _uiState.update {
+                    it.copy(isLoading = false, isRefreshing = false, error = result.error)
+                }
             }
         }
     }
