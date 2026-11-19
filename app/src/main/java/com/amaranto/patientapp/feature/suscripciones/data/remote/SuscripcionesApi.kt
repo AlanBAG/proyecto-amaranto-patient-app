@@ -9,18 +9,15 @@ import retrofit2.http.Path
 
 interface SuscripcionesApi {
 
-    @GET("api/planes-suscripciones")
+    @GET("planes-suscripciones")
     suspend fun getPlanes(): Response<List<PlanDto>>
 
-    // El paciente sale del token: nunca se envía paciente_id.
-    @POST("api/suscripciones-pacientes")
+    @POST("suscripciones-pacientes")
     suspend fun contratar(@Body body: CrearSuscripcionRequest): Response<CrearSuscripcionResponse>
 
-    // Responde { "message": ... }; el cuerpo no se usa.
-    @PUT("api/suscripciones-pacientes/{id}/cancelar")
+    @PUT("suscripciones-pacientes/{id}/cancelar")
     suspend fun cancelar(@Path("id") id: String): Response<Unit>
 
-    // PROPUESTO (validar con backend): aún no construido. Arreglo de objetos como "suscripcion" del POST.
-    @GET("api/mis-suscripciones")
+    @GET("mis-suscripciones")
     suspend fun getMisSuscripciones(): Response<List<SuscripcionDto>>
 }
