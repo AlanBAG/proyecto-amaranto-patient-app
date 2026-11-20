@@ -1,6 +1,13 @@
 package com.amaranto.patientapp.views
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.res.stringResource
+import com.amaranto.patientapp.R
+import com.amaranto.patientapp.feature.consultorio.ConsultorioActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -42,6 +49,7 @@ class ProfileActivity : AppCompatActivity() {
         setContent {
             AmarantoTheme {
                 val state by viewModel.uiState.collectAsStateWithLifecycle()
+                val foto by viewModel.foto.collectAsStateWithLifecycle()
                 val snackbarHostState = remember { SnackbarHostState() }
                 val context = LocalContext.current
 
@@ -58,6 +66,17 @@ class ProfileActivity : AppCompatActivity() {
                     }
                 }
 
+                // Cámara del sistema: escribe la foto en la Uri del FileProvider. No requiere permiso CAMERA
+                // mientras la app no lo declare en el manifiesto.
+                val tomarFoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+                    viewModel.onFotoCapturada(ok)
+                }
+                // Selector de fotos del sistema: no requiere permiso de almacenamiento.
+                val elegirFoto = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                    viewModel.onFotoElegida(uri)
+                }
+                val sinCamara = stringResource(R.string.perfil_foto_sin_camara)
+
                 ProfileScreen(
                     state = state,
                     snackbarHostState = snackbarHostState,
@@ -66,7 +85,20 @@ class ProfileActivity : AppCompatActivity() {
                     onOpenSuscripciones = { startActivity(Intent(this, SuscripcionesActivity::class.java)) },
                     onCerrarSesionClick = viewModel::onCerrarSesionClick,
                     onCerrarSesionDismiss = viewModel::onCerrarSesionDismiss,
-                    onCerrarSesionConfirm = viewModel::onCerrarSesionConfirm
+                    onCerrarSesionConfirm = viewModel::onCerrarSesionConfirm,
+                    foto = foto,
+                    onTomarFoto = {
+                        try {
+                            tomarFoto.launch(viewModel.uriParaCaptura())
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(context, sinCamara, Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onElegirFoto = {
+                        elegirFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    onQuitarFoto = viewModel::onQuitarFoto,
+                    onAbrirConsultorio = { startActivity(Intent(this, ConsultorioActivity::class.java)) }
                 )
             }
         }

@@ -48,6 +48,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amaranto.patientapp.R
+import android.content.Intent
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Surface
+import com.amaranto.patientapp.feature.consultorio.ConsultorioActivity
 import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
 import com.amaranto.patientapp.core.ui.EmptyState
 import com.amaranto.patientapp.core.ui.RefreshableFill
@@ -127,6 +131,7 @@ fun CitasScreen(
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
+            ConsultorioAcceso()
             PrimaryTabRow(selectedTabIndex = tab) {
                 Tab(
                     selected = tab == 0,
@@ -294,4 +299,32 @@ private fun CancelarCitaDialog(
             }
         }
     )
+}
+
+/**
+ * Acceso a la pantalla del consultorio: en Citas porque es donde el paciente piensa en "a dónde voy".
+ * Una fila compacta para no quitarle espacio a la lista.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ConsultorioAcceso() {
+    val context = LocalContext.current
+    Surface(
+        onClick = { context.startActivity(Intent(context, ConsultorioActivity::class.java)) },
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Filled.LocationOn, contentDescription = null)
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(stringResource(R.string.consultorio_acceso_titulo), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.consultorio_direccion_corta), style = MaterialTheme.typography.bodySmall)
+            }
+            Text(stringResource(R.string.consultorio_acceso_ver), style = MaterialTheme.typography.labelLarge)
+        }
+    }
 }

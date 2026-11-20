@@ -2,6 +2,24 @@ package com.amaranto.patientapp.views
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import coil3.compose.AsyncImage
+import java.io.File
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,8 +93,15 @@ fun ProfileScreen(
     onOpenSuscripciones: () -> Unit,
     onCerrarSesionClick: () -> Unit,
     onCerrarSesionDismiss: () -> Unit,
-    onCerrarSesionConfirm: () -> Unit
+    onCerrarSesionConfirm: () -> Unit,
+    foto: File? = null,
+    onTomarFoto: () -> Unit = {},
+    onElegirFoto: () -> Unit = {},
+    onQuitarFoto: () -> Unit = {},
+    onAbrirConsultorio: () -> Unit = {}
 ) {
+    var mostrarOpcionesFoto by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -105,13 +130,26 @@ fun ProfileScreen(
                     } else {
                         ProfileContent(
                             state = state,
+                            foto = foto,
+                            onFotoClick = { mostrarOpcionesFoto = true },
                             onOpenSuscripciones = onOpenSuscripciones,
+                            onAbrirConsultorio = onAbrirConsultorio,
                             onCerrarSesionClick = onCerrarSesionClick
                         )
                     }
                 }
             }
         }
+    }
+
+    if (mostrarOpcionesFoto) {
+        OpcionesFotoSheet(
+            tieneFoto = foto != null,
+            onDismiss = { mostrarOpcionesFoto = false },
+            onTomarFoto = { mostrarOpcionesFoto = false; onTomarFoto() },
+            onElegirFoto = { mostrarOpcionesFoto = false; onElegirFoto() },
+            onQuitarFoto = { mostrarOpcionesFoto = false; onQuitarFoto() }
+        )
     }
 
     if (state.mostrarConfirmarCierre) {
@@ -141,7 +179,10 @@ fun ProfileScreen(
 @Composable
 private fun ProfileContent(
     state: ProfileUiState,
+    foto: File?,
+    onFotoClick: () -> Unit,
     onOpenSuscripciones: () -> Unit,
+    onAbrirConsultorio: () -> Unit,
     onCerrarSesionClick: () -> Unit
 ) {
     LazyColumn(
@@ -160,7 +201,7 @@ private fun ProfileContent(
             }
         }
 
-        item(key = "encabezado") { EncabezadoCard(state) }
+        item(key = "encabezado") { EncabezadoCard(state, foto, onFotoClick) }
 
         val historial = state.historial
         if (state.sinExpediente || historial == null) {
@@ -188,6 +229,20 @@ private fun ProfileContent(
                     Text(stringResource(R.string.profile_suscripcion), fontWeight = FontWeight.Bold)
                 }
                 OutlinedButton(
+                    onClick = onAbrirConsultorio,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.5.dp, BrandGreen),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = BrandGreen)
+                ) {
+                    Icon(Icons.Filled.LocationOn, contentDescription = null)
+                    Text(
+                        stringResource(R.string.consultorio_acceso_titulo),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
+                }
+                OutlinedButton(
                     onClick = onCerrarSesionClick,
                     enabled = !state.isCerrandoSesion,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -207,7 +262,7 @@ private fun ProfileContent(
 }
 
 @Composable
-private fun EncabezadoCard(state: ProfileUiState) {
+private fun EncabezadoCard(state: ProfileUiState, foto: File?, onFotoClick: () -> Unit) {
     val nombre = state.usuario?.name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.perfil_nombre_default)
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -216,18 +271,7 @@ private fun EncabezadoCard(state: ProfileUiState) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Avatar con iniciales (no hay foto de perfil en el contrato).
-            Box(
-                modifier = Modifier.size(56.dp).background(Color.White, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = iniciales(nombre),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.accentText
-                )
-            }
+            Avatar(nombre = nombre, foto = foto, onClick = onFotoClick)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
@@ -289,3 +333,86 @@ internal fun iniciales(nombre: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
         .ifEmpty { "?" }
+
+
+/**
+ * Foto de perfil local o, si no hay, las iniciales. Al tocarla se abren las opciones de foto.
+ * El lápiz indica que se puede cambiar.
+ */
+@Composable
+private fun Avatar(nombre: String, foto: File?, onClick: () -> Unit) {
+    val descripcion = stringResource(R.string.perfil_foto_cambiar)
+    Box(
+        modifier = Modifier
+            .size(72.dp)
+            .clickable(onClickLabel = descripcion, onClick = onClick)
+            .semantics { contentDescription = descripcion }
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize().clip(CircleShape).background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            if (foto != null) {
+                AsyncImage(
+                    model = foto,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Text(
+                    text = iniciales(nombre),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.accentText
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(24.dp)
+                .background(BrandGreen, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OpcionesFotoSheet(
+    tieneFoto: Boolean,
+    onDismiss: () -> Unit,
+    onTomarFoto: () -> Unit,
+    onElegirFoto: () -> Unit,
+    onQuitarFoto: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(bottom = 24.dp)) {
+            Text(
+                text = stringResource(R.string.perfil_foto_titulo),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+            )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.perfil_foto_tomar)) },
+                leadingContent = { Icon(Icons.Filled.Add, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onTomarFoto)
+            )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.perfil_foto_galeria)) },
+                leadingContent = { Icon(Icons.Filled.Face, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onElegirFoto)
+            )
+            if (tieneFoto) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.perfil_foto_quitar), color = BrandHeart) },
+                    leadingContent = { Icon(Icons.Filled.Delete, contentDescription = null, tint = BrandHeart) },
+                    modifier = Modifier.clickable(onClick = onQuitarFoto)
+                )
+            }
+        }
+    }
+}

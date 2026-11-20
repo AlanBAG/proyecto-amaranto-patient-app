@@ -53,6 +53,23 @@
             android:exported="false"
             android:label="@string/profile_title" />
 
+        <!-- Pantalla del consultorio (mapa MapLibre) -->
+        <activity
+            android:name=".feature.consultorio.ConsultorioActivity"
+            android:exported="false" />
+
+        <!-- Comparte con la app de cámara SOLO el archivo temporal de captura -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+
         <!-- Push de Firebase Cloud Messaging -->
         <service
             android:name=".feature.notificaciones.push.AmarantoMessagingService"

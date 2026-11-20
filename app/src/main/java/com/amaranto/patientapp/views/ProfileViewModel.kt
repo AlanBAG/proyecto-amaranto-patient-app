@@ -9,6 +9,9 @@ import com.amaranto.patientapp.core.network.ApiResult
 import com.amaranto.patientapp.core.network.AppError
 import com.amaranto.patientapp.core.network.safeApiCall
 import com.amaranto.patientapp.core.session.CerrarSesionUseCase
+import com.amaranto.patientapp.feature.perfil.FotoPerfilStore
+import android.net.Uri
+import java.io.File
 import com.amaranto.patientapp.models.HistorialClinicoResponse
 import com.amaranto.patientapp.models.UserResponse
 import com.amaranto.patientapp.utils.SessionManager
@@ -54,8 +57,12 @@ sealed interface ProfileEvent {
 class ProfileViewModel @Inject constructor(
     private val apiService: ApiService,
     private val sessionManager: SessionManager,
-    private val cerrarSesion: CerrarSesionUseCase
+    private val cerrarSesion: CerrarSesionUseCase,
+    private val fotoPerfilStore: FotoPerfilStore
 ) : ViewModel() {
+
+    /** Foto de perfil local (null = se muestran las iniciales). */
+    val foto: StateFlow<File?> = fotoPerfilStore.foto
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -66,7 +73,34 @@ class ProfileViewModel @Inject constructor(
     private var loadJob: Job? = null
 
     init {
+        fotoPerfilStore.refrescar()
         refresh()
+    }
+
+    /** Uri donde la app de cámara guardará la foto (ActivityResultContracts.TakePicture). */
+    fun uriParaCaptura(): Uri = fotoPerfilStore.uriParaCaptura()
+
+    /** Resultado de la cámara: false = el usuario canceló. */
+    fun onFotoCapturada(ok: Boolean) {
+        if (!ok) return
+        viewModelScope.launch { avisarResultado(fotoPerfilStore.guardarCaptura()) }
+    }
+
+    /** Resultado de la galería: null = el usuario no eligió nada. */
+    fun onFotoElegida(uri: Uri?) {
+        uri ?: return
+        viewModelScope.launch { avisarResultado(fotoPerfilStore.guardarDesde(uri)) }
+    }
+
+    fun onQuitarFoto() {
+        fotoPerfilStore.quitar()
+        viewModelScope.launch { _events.send(ProfileEvent.ShowMessage(R.string.perfil_foto_quitada)) }
+    }
+
+    private suspend fun avisarResultado(ok: Boolean) {
+        _events.send(
+            ProfileEvent.ShowMessage(if (ok) R.string.perfil_foto_actualizada else R.string.perfil_foto_error)
+        )
     }
 
     fun refresh() {

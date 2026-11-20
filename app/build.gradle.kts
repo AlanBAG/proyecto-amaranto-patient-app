@@ -111,4 +111,6 @@ dependencies {
     implementation(libs.firebase.messaging)
 
     implementation(libs.tink.android)
+
+    implementation(libs.maplibre.android)
 }
