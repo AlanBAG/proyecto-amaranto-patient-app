@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Carpetas que el FileProvider puede compartir con la app de cámara.
+    Solo la carpeta temporal de capturas: la foto final queda en filesDir/perfil y nunca se comparte.
+-->
+<paths>
+    <cache-path name="camera" path="camera/" />
+</paths>
