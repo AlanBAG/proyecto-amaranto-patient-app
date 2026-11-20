@@ -55,7 +55,6 @@
     <string name="perfil_sesion_cerrada">Sesión cerrada correctamente</string>
     <string name="perfil_sesion_expirada">Tu sesión expiró. Inicia sesión de nuevo.</string>
 
-
     <!-- Suscripciones -->
     <string name="suscripciones_tu_suscripcion">Tu suscripción</string>
     <string name="suscripciones_vigencia">Vigente del %1$s al %2$s</string>
@@ -249,5 +248,30 @@
 
     <!-- Notificaciones: botón de volver en la barra superior -->
     <string name="nav_plan_corto">Plan</string>
+
+    <!-- Consultorio -->
+    <string name="consultorio_titulo">Consultorio</string>
+    <string name="consultorio_volver">Volver</string>
+    <string name="consultorio_nombre">Consultorio Amaranto</string>
+    <string name="consultorio_direccion">Río Caribe 1183, Atlas, 44890, Guadalajara, Jalisco</string>
+    <string name="consultorio_direccion_corta">Río Caribe 1183, Atlas, GDL</string>
+    <string name="consultorio_horario">Horario: Lunes a Domingo, 8:00 a 15:00</string>
+    <string name="consultorio_telefono_visible">Teléfono: 33 1910 7434</string>
+    <string name="consultorio_como_llegar">Cómo llegar</string>
+    <string name="consultorio_llamar">Llamar</string>
+    <string name="consultorio_sin_app">No hay una app instalada para abrir esto</string>
+    <string name="consultorio_acceso_titulo">Ubicación del consultorio</string>
+    <string name="consultorio_acceso_ver">Ver mapa</string>
+
+    <!-- Foto de perfil -->
+    <string name="perfil_foto_cambiar">Cambiar foto de perfil</string>
+    <string name="perfil_foto_titulo">Foto de perfil</string>
+    <string name="perfil_foto_tomar">Tomar foto</string>
+    <string name="perfil_foto_galeria">Elegir de la galería</string>
+    <string name="perfil_foto_quitar">Quitar foto</string>
+    <string name="perfil_foto_actualizada">Foto de perfil actualizada</string>
+    <string name="perfil_foto_quitada">Foto de perfil eliminada</string>
+    <string name="perfil_foto_error">No se pudo guardar la foto. Intenta con otra.</string>
+    <string name="perfil_foto_sin_camara">Este dispositivo no tiene una app de cámara</string>
 
 </resources>
