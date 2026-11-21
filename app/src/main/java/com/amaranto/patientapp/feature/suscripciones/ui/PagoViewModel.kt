@@ -82,14 +82,13 @@ class PagoViewModel @Inject constructor(
     fun onNumeroChange(value: String) {
         val digits = CardValidator.digitsOnly(value).take(19)
         _uiState.update {
-            it.copy(numero = digits.chunked(4).joinToString(" "), submitErrorRes = null)
+            it.copy(numero = digits, submitErrorRes = null)
         }
     }
 
     fun onVencimientoChange(value: String) {
         val digits = CardValidator.digitsOnly(value).take(4)
-        val formatted = if (digits.length > 2) digits.take(2) + "/" + digits.drop(2) else digits
-        _uiState.update { it.copy(vencimiento = formatted, submitErrorRes = null) }
+        _uiState.update { it.copy(vencimiento = digits, submitErrorRes = null) }
     }
 
     fun onCvvChange(value: String) =
@@ -108,7 +107,13 @@ class PagoViewModel @Inject constructor(
 
         _uiState.update { it.copy(isProcessing = true, submitErrorRes = null) }
         viewModelScope.launch {
-            val card = CardData(state.numero, state.titular, state.vencimiento, state.cvv)
+            val formattedNumero = state.numero.chunked(4).joinToString(" ")
+            val formattedExpiry = if (state.vencimiento.length >= 3) {
+                state.vencimiento.take(2) + "/" + state.vencimiento.drop(2)
+            } else {
+                state.vencimiento
+            }
+            val card = CardData(formattedNumero, state.titular, formattedExpiry, state.cvv)
             when (val result = contratarPlan(plan, card)) {
                 is ContratarResult.Success -> _uiState.update {
                     // Los datos de tarjeta se borran de memoria al terminar.
