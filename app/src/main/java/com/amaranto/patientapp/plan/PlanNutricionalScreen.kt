@@ -1,5 +1,6 @@
 package com.amaranto.patientapp.plan
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,21 +25,28 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.amaranto.patientapp.R
 import com.amaranto.patientapp.core.network.AppError
 import com.amaranto.patientapp.core.ui.AmarantoPullToRefresh
@@ -47,6 +56,7 @@ import com.amaranto.patientapp.core.ui.LoadingState
 import com.amaranto.patientapp.core.ui.RefreshableFill
 import com.amaranto.patientapp.core.ui.messageRes
 import com.amaranto.patientapp.core.ui.theme.accentText
+import com.amaranto.patientapp.feature.planpdf.abrirPdf
 import com.amaranto.patientapp.models.RecetaResponse
 
 private val diasSemana = listOf(
@@ -70,27 +80,40 @@ private val tiemposComida = listOf(
 @Composable
 fun PlanNutricionalScreen(viewModel: PlanNutricionalViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Solo con la pantalla visible (STARTED): si la descarga termina con la app en segundo plano,
+    // el evento espera en el Channel y el visor se abre al volver.
+    LaunchedEffect(viewModel, lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is PlanEvent.AbrirPdf -> if (!abrirPdf(context, event.archivo)) {
+                        Toast.makeText(context, R.string.plan_pdf_sin_visor, Toast.LENGTH_LONG).show()
+                    }
+                    is PlanEvent.Mensaje ->
+                        Toast.makeText(context, event.res, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     when {
         state.isLoading -> LoadingState()
         else -> AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = viewModel::refresh) {
+            val plan = state.plan
+            val error = state.error
             when {
-                state.isLoading -> LoadingState()
-                else -> AmarantoPullToRefresh(isRefreshing = state.isRefreshing, onRefresh = viewModel::refresh) {
-                    // Copias locales: `state` es delegada (by) y no permite smart cast.
-                    val plan = state.plan
-                    val error = state.error
-                    when {
-                        error != null && !state.hasLoaded ->
-                            RefreshableFill { ErrorState(error = error, onRetry = viewModel::refresh) }
-                        plan == null -> RefreshableFill { EmptyState(stringResource(R.string.plan_vacio)) }
-                        else -> PlanContent(
-                            state = state,
-                            onDiaClick = viewModel::onDiaClick,
-                            onRecetaClick = viewModel::onRecetaClick
-                        )
-                    }
-                }
+                error != null && !state.hasLoaded ->
+                    RefreshableFill { ErrorState(error = error, onRetry = viewModel::refresh) }
+                plan == null -> RefreshableFill { EmptyState(stringResource(R.string.plan_vacio)) }
+                else -> PlanContent(
+                    state = state,
+                    onDiaClick = viewModel::onDiaClick,
+                    onRecetaClick = viewModel::onRecetaClick,
+                    onDescargarPdf = viewModel::onDescargarPdf
+                )
             }
         }
     }
@@ -110,7 +133,8 @@ fun PlanNutricionalScreen(viewModel: PlanNutricionalViewModel = hiltViewModel())
 private fun PlanContent(
     state: PlanUiState,
     onDiaClick: (String) -> Unit,
-    onRecetaClick: (RecetaResponse) -> Unit
+    onRecetaClick: (RecetaResponse) -> Unit,
+    onDescargarPdf: () -> Unit
 ) {
     val plan = state.plan ?: return
     val menuDia = plan.menuSemanal?.get(state.diaSeleccionado) ?: emptyMap()
@@ -184,11 +208,18 @@ private fun PlanContent(
 
         item(key = "dias") {
             Column {
-                Text(
-                    text = stringResource(R.string.plan_menu_semanal),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.plan_menu_semanal),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    // Sin id no hay a qué ruta pedir el PDF.
+                    if (!plan.id.isNullOrBlank()) {
+                        DescargarPdfButton(descargando = state.descargandoPdf, onClick = onDescargarPdf)
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(diasSemana, key = { it.first }) { (key, labelRes) ->
@@ -240,6 +271,19 @@ private fun PlanContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DescargarPdfButton(descargando: Boolean, onClick: () -> Unit) {
+    FilledTonalButton(onClick = onClick, enabled = !descargando) {
+        if (descargando) {
+            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.plan_pdf_descargando))
+        } else {
+            Text(stringResource(R.string.plan_pdf_descargar))
         }
     }
 }

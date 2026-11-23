@@ -274,4 +274,11 @@
     <string name="perfil_foto_error">No se pudo guardar la foto. Intenta con otra.</string>
     <string name="perfil_foto_sin_camara">Este dispositivo no tiene una app de cámara</string>
 
+    <!-- PDF de plan nutricional -->
+    <string name="plan_pdf_descargar">Descargar PDF</string>
+    <string name="plan_pdf_descargando">Descargando…</string>
+    <string name="plan_pdf_sin_visor">No tienes una app para abrir PDF. Instala un visor (por ejemplo, Google Drive) e inténtalo de nuevo.</string>
+    <string name="plan_pdf_sin_acceso">No tienes acceso al PDF de este plan.</string>
+    <string name="plan_pdf_no_encontrado">No se encontró el plan. Desliza hacia abajo para actualizar.</string>
+
 </resources>

@@ -1,25 +1,33 @@
 package com.amaranto.patientapp.plan
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amaranto.patientapp.BuildConfig
+import com.amaranto.patientapp.R
 import com.amaranto.patientapp.api.ApiService
 import com.amaranto.patientapp.core.network.ApiResult
 import com.amaranto.patientapp.core.network.AppError
 import com.amaranto.patientapp.core.network.safeApiCall
+import com.amaranto.patientapp.core.ui.messageRes
+import com.amaranto.patientapp.feature.planpdf.PlanPdfRepository
 import com.amaranto.patientapp.models.IngredienteItem
 import com.amaranto.patientapp.models.PlanNutricionalResponse
 import com.amaranto.patientapp.models.RecetaResponse
 import com.amaranto.patientapp.utils.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.File
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,8 +40,15 @@ data class PlanUiState(
     val recetas: Map<String, RecetaResponse> = emptyMap(),
     val diaSeleccionado: String = "lunes",
     val recetaDetalle: RecetaResponse? = null,
-    val hasLoaded: Boolean = false
+    val hasLoaded: Boolean = false,
+    val descargandoPdf: Boolean = false
 )
+
+/** Eventos de una sola vez (abrir el visor, mostrar un mensaje): no se repiten al rotar. */
+sealed interface PlanEvent {
+    data class AbrirPdf(val archivo: File) : PlanEvent
+    data class Mensaje(@StringRes val res: Int) : PlanEvent
+}
 
 /**
  * Lógica que antes estaba dentro de PlanNutricionalScreen (de Alan), movida a un ViewModel para:
@@ -47,6 +62,7 @@ data class PlanUiState(
 class PlanNutricionalViewModel @Inject constructor(
     private val apiService: ApiService,
     private val sessionManager: SessionManager,
+    private val planPdfRepository: PlanPdfRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,6 +70,9 @@ class PlanNutricionalViewModel @Inject constructor(
         PlanUiState(diaSeleccionado = savedStateHandle[KEY_DIA] ?: "lunes")
     )
     val uiState: StateFlow<PlanUiState> = _uiState.asStateFlow()
+
+    private val _events = Channel<PlanEvent>(Channel.BUFFERED)
+    val events: Flow<PlanEvent> = _events.receiveAsFlow()
 
     private var loadJob: Job? = null
 
@@ -118,6 +137,31 @@ class PlanNutricionalViewModel @Inject constructor(
     fun onRecetaClick(receta: RecetaResponse) = _uiState.update { it.copy(recetaDetalle = receta) }
 
     fun onRecetaDismiss() = _uiState.update { it.copy(recetaDetalle = null) }
+
+    /** GET /api/mis-planes/{id}/pdf con el id del plan mostrado; al terminar, la pantalla abre el visor. */
+    fun onDescargarPdf() {
+        val planId = _uiState.value.plan?.id
+        if (planId.isNullOrBlank() || _uiState.value.descargandoPdf) return
+        _uiState.update { it.copy(descargandoPdf = true) }
+
+        viewModelScope.launch {
+            val result = planPdfRepository.descargar(planId)
+            _uiState.update { it.copy(descargandoPdf = false) }
+            _events.send(
+                when (result) {
+                    is ApiResult.Success -> PlanEvent.AbrirPdf(result.data)
+                    is ApiResult.Failure -> PlanEvent.Mensaje(result.error.pdfMessageRes())
+                }
+            )
+        }
+    }
+
+    @StringRes
+    private fun AppError.pdfMessageRes(): Int = when (this) {
+        AppError.Forbidden -> R.string.plan_pdf_sin_acceso   // plan de otro paciente o no "guardado"
+        AppError.NotFound -> R.string.plan_pdf_no_encontrado
+        else -> messageRes()                                 // red, servidor, etc.: mensajes comunes
+    }
 
     // --- Datos de prueba (los mismos que tenía la pantalla), solo con USE_FAKE_DATA ---
 
