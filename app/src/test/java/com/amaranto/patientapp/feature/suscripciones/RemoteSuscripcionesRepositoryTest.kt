@@ -29,7 +29,7 @@ class RemoteSuscripcionesRepositoryTest {
     fun setUp() {
         server = MockWebServer().apply { start() }
         val api = Retrofit.Builder()
-            .baseUrl(server.url("/"))
+            .baseUrl(server.url("/api/"))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(SuscripcionesApi::class.java)
