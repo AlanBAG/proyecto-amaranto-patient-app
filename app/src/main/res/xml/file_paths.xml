@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Carpetas que el FileProvider puede compartir con la app de cámara.
-    Solo la carpeta temporal de capturas: la foto final queda en filesDir/perfil y nunca se comparte.
+    Carpetas que el FileProvider puede compartir con otras apps.
+    - camera/: captura temporal para la app de cámara (la foto final queda en filesDir/perfil y no se comparte).
+    - pdf/: PDF del plan alimenticio para el visor de PDF.
 -->
 <paths>
     <cache-path name="camera" path="camera/" />
+    <cache-path name="pdf" path="pdf/" />
 </paths>
