@@ -16,6 +16,7 @@ import com.amaranto.patientapp.utils.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import com.amaranto.patientapp.utils.permitirCompartirPantallaEnDebug
 
 /**
  * Pantalla de Inicio de Sesión para Pacientes.
@@ -39,7 +40,12 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.etPassword.permitirCompartirPantallaEnDebug()
+
         // Si ya existe una sesión activa, redirige automáticamente al Home
+
         if (sessionManager.isLoggedIn()) {
             Log.d(TAG, "Sesión previa activa detectada. Redirigiendo a Home...")
             navigateToHome()
