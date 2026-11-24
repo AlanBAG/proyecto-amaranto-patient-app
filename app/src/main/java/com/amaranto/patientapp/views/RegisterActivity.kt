@@ -16,6 +16,7 @@ import com.amaranto.patientapp.databinding.ActivityRegisterBinding
 import com.amaranto.patientapp.models.RegisterRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import com.amaranto.patientapp.utils.permitirCompartirPantallaEnDebug
 
 /**
  * Pantalla de Registro para Pacientes.
@@ -37,6 +38,8 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         aplicarInsets()
+
+        binding.etPassword.permitirCompartirPantallaEnDebug()
 
         // Al girar la pantalla, Android restaura la casilla y este listener vuelve a ajustar el botón.
         binding.cbAvisoPrivacidad.setOnCheckedChangeListener { _, _ -> actualizarBotonRegistro() }

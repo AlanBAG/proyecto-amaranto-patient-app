@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!--
         Tema Principal de la Aplicación.
         Siempre claro: la paleta de Brisa solo tiene versión clara. Con DayNight, en modo oscuro las
@@ -17,5 +17,8 @@
         <!-- Fondo de la pantalla -->
         <item name="android:windowBackground">@color/background</item>
         <!-- android:statusBarColor se quitó: con targetSdk 35 la app es edge-to-edge y Android lo ignora. -->
+        <!-- Edge-to-edge: el fondo claro se ve detrás de las barras, así que los íconos deben ser oscuros. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 </resources>
