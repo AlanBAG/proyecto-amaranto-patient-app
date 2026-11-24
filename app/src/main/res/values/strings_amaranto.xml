@@ -281,4 +281,11 @@
     <string name="plan_pdf_sin_acceso">No tienes acceso al PDF de este plan.</string>
     <string name="plan_pdf_no_encontrado">No se encontró el plan. Desliza hacia abajo para actualizar.</string>
 
+    <!-- Registro: aviso de privacidad -->
+    <string name="register_aviso_acepto">Acepto el</string>
+    <string name="register_aviso_link"><u>aviso de privacidad</u></string>
+    <string name="aviso_privacidad_titulo">Aviso de privacidad</string>
+    <string name="aviso_privacidad_acepto">Acepto</string>
+    <string name="aviso_privacidad_cerrar">Cerrar</string>
+    <string name="aviso_privacidad_texto"><b>¿Quién es el responsable?</b> Amaranto, con domicilio en Río Caribe 1183, Atlas, 44890, Guadalajara, Jal., es responsable del tratamiento de tus datos personales.\n\n<b>¿Qué datos recabamos?</b> Datos de identificación y contacto (nombre, correo, teléfono, fecha de nacimiento) y datos de salud (historial clínico, peso, medidas, hábitos y padecimientos). Los datos de salud son datos sensibles.\n\n<b>¿Para qué los usamos?</b> Para dar seguimiento nutricional, agendar tus citas, elaborar tus planes alimenticios y enviarte recordatorios y notificaciones.\n\n<b>¿Cómo los protegemos?</b> Solo pueden verlos tu nutriólogo y tú, con usuario y contraseña. No vendemos ni compartimos tus datos con terceros.\n\n<b>Tus derechos:</b> Puedes acceder, rectificar o cancelar tus datos, u oponerte a su uso, escribiendo a contacto@amaranto.com.\n\n<b>Consentimiento:</b> Al usar Amaranto aceptas el tratamiento de tus datos, incluidos los sensibles, como se describe aquí. Si este aviso cambia, lo publicaremos en la app.</string>
 </resources>
