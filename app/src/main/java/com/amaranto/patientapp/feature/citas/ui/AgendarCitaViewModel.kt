@@ -18,7 +18,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,9 +31,11 @@ import kotlinx.coroutines.launch
 sealed interface HorasState {
     data object Loading : HorasState
     data class Error(val error: AppError) : HorasState
+
     /** El nutriólogo no tiene bloques ese día (404 o lista vacía). */
     data object SinHorarios : HorasState
-    /** Hay horario, pero todas las horas ya pasaron, están bloqueadas o el paciente ya las tiene. */
+
+    /** Hay horario, pero todas las horas ya pasaron, están bloqueadas u ocupadas. */
     data object SinHorasLibres : HorasState
     data class Disponibles(val horas: List<LocalTime>) : HorasState
 }
@@ -72,6 +76,12 @@ class AgendarCitaViewModel @Inject constructor(
     /** La disponibilidad solo depende del día de la semana: máximo 7 llamadas por pantalla. */
     private val cacheDisponibilidad = mutableMapOf<DayOfWeek, List<BloqueHorario>>()
 
+    /**
+     * Horas ocupadas por cualquier paciente. NO es caché: se sobrescribe en cada carga del día
+     * porque otro paciente pudo agendar hace un momento.
+     */
+    private val ocupadasPorFecha = mutableMapOf<LocalDate, Set<LocalTime>>()
+
     /** Citas del paciente, para no ofrecer horas que ya tiene. Si falla la carga se sigue sin ellas. */
     private var citasPaciente: List<Cita>? = null
 
@@ -106,7 +116,7 @@ class AgendarCitaViewModel @Inject constructor(
 
         // Revalida justo antes del POST: si el usuario tardó, la hora pudo haber pasado.
         val bloques = cacheDisponibilidad[fecha.dayOfWeek].orEmpty()
-        val sigueLibre = hora in calcularHorasLibres(fecha, bloques, citasPaciente.orEmpty())
+        val sigueLibre = hora in horasLibres(fecha, bloques)
         if (!sigueLibre) {
             _uiState.update { it.copy(horaAConfirmar = null) }
             viewModelScope.launch { _events.send(AgendarEvent.ShowMessage(R.string.citas_error_hora_pasada)) }
@@ -121,11 +131,12 @@ class AgendarCitaViewModel @Inject constructor(
                     _uiState.update { it.copy(isAgendando = false, horaAConfirmar = null) }
                     _events.send(AgendarEvent.Agendada)
                 }
+
                 is ApiResult.Failure -> {
                     _uiState.update { it.copy(isAgendando = false, horaAConfirmar = null) }
                     _events.send(AgendarEvent.ShowMessage(result.error.agendarMessageRes()))
                     if (result.error == AppError.Conflict || result.error == AppError.Validation) {
-                        // El horario cambió en el back: se piden de nuevo los bloques de ese día.
+                        // Otro paciente la tomó o cambió el horario: se recargan bloques y horas ocupadas.
                         cacheDisponibilidad.remove(fecha.dayOfWeek)
                         cargarHoras(fecha)
                     }
@@ -135,7 +146,7 @@ class AgendarCitaViewModel @Inject constructor(
     }
 
     private fun cargarHoras(fecha: LocalDate) {
-        horasJob?.cancel()
+        horasJob?.cancel() // si cambia de día rápido, se descarta la carga anterior
         _uiState.update { it.copy(horas = HorasState.Loading) }
         horasJob = viewModelScope.launch {
             if (citasPaciente == null) {
@@ -144,16 +155,45 @@ class AgendarCitaViewModel @Inject constructor(
                     is ApiResult.Failure -> null // se reintenta en la siguiente carga de horas
                 }
             }
-            val bloques = cacheDisponibilidad[fecha.dayOfWeek] ?: when (val result = repository.getDisponibilidad(fecha.dayOfWeek)) {
-                is ApiResult.Success -> result.data.also { cacheDisponibilidad[fecha.dayOfWeek] = it }
+
+            val dia = fecha.dayOfWeek
+            // Disponibilidad (con caché) y horas ocupadas (siempre frescas) en paralelo.
+            val (bloquesResult, ocupadasResult) = coroutineScope {
+                val bloques = async {
+                    cacheDisponibilidad[dia]?.let { ApiResult.Success(it) }
+                        ?: repository.getDisponibilidad(dia)
+                }
+                val ocupadas = async { repository.getHorasOcupadas(fecha) }
+                bloques.await() to ocupadas.await()
+            }
+
+            val bloques = when (bloquesResult) {
+                is ApiResult.Success -> bloquesResult.data.also { cacheDisponibilidad[dia] = it }
                 is ApiResult.Failure -> {
-                    _uiState.update { it.copy(horas = HorasState.Error(result.error)) }
+                    _uiState.update { it.copy(horas = HorasState.Error(bloquesResult.error)) }
                     return@launch
                 }
             }
+            when (ocupadasResult) {
+                is ApiResult.Success -> ocupadasPorFecha[fecha] = ocupadasResult.data
+                is ApiResult.Failure -> {
+                    // Sin esta lista podríamos ofrecer horas ya tomadas: mejor error + Reintentar.
+                    _uiState.update { it.copy(horas = HorasState.Error(ocupadasResult.error)) }
+                    return@launch
+                }
+            }
+
             if (_uiState.value.diaSeleccionado == fecha) recalcular(fecha, bloques)
         }
     }
+
+    private fun horasLibres(fecha: LocalDate, bloques: List<BloqueHorario>): List<LocalTime> =
+        calcularHorasLibres(
+            fecha,
+            bloques,
+            citasPaciente.orEmpty(),
+            ocupadasPorFecha[fecha].orEmpty()
+        )
 
     private fun recalcular(
         fecha: LocalDate,
@@ -161,7 +201,7 @@ class AgendarCitaViewModel @Inject constructor(
     ) {
         val horas = when {
             bloques.isEmpty() -> HorasState.SinHorarios
-            else -> calcularHorasLibres(fecha, bloques, citasPaciente.orEmpty())
+            else -> horasLibres(fecha, bloques)
                 .let { if (it.isEmpty()) HorasState.SinHorasLibres else HorasState.Disponibles(it) }
         }
         _uiState.update { it.copy(horas = horas) }
