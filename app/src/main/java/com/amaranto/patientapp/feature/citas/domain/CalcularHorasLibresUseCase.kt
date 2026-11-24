@@ -15,13 +15,14 @@ import javax.inject.Inject
 /**
  * Calcula las horas en punto que el paciente puede elegir en [fecha].
  *
- * Reglas (contrato validado, 7 nov):
+ * Reglas (contrato validado, 7 nov; regla 6 agregada el 24 nov):
  * 1. Solo bloques "disponible" activos.
  * 2. Horas en punto desde ceil(hora_inicio) mientras hora + 60 min <= hora_fin.
  * 3. Se descarta la hora si el intervalo [h, h+60) se encima con un bloque "bloqueado" activo.
  * 4. Si [fecha] es hoy, solo horas posteriores a "ahora".
  * 5. Se descartan horas en las que el paciente ya tiene una cita pendiente ese día.
- * 6. Fuera del rango hoy..hoy+30 no hay horas.
+ * 6. Se descartan las horas ocupadas por cualquier paciente (GET /citas/ocupadas/{fecha}).
+ * 7. Fuera del rango hoy..hoy+30 no hay horas.
  *
  * El Clock viene inyectado con zona America/Mexico_City para no depender de la zona del teléfono.
  */
@@ -31,7 +32,8 @@ class CalcularHorasLibresUseCase @Inject constructor(
     operator fun invoke(
         fecha: LocalDate,
         bloques: List<BloqueHorario>,
-        citasPaciente: List<Cita>
+        citasPaciente: List<Cita>,
+        horasOcupadas: Set<LocalTime> = emptySet()
     ): List<LocalTime> {
         val ahora = LocalDateTime.now(clock)
         val hoy = ahora.toLocalDate()
@@ -41,10 +43,10 @@ class CalcularHorasLibresUseCase @Inject constructor(
         val disponibles = activos.filter { it.tipo == TipoBloque.DISPONIBLE }
         val bloqueados = activos.filter { it.tipo == TipoBloque.BLOQUEADO }
 
-        val ocupadasPorPaciente: Set<Int> = citasPaciente
+        val ocupadas: Set<Int> = citasPaciente
             .filter { it.estado == EstadoCita.PENDIENTE && it.fecha == fecha }
             .map { it.hora.hour }
-            .toSet()
+            .toSet() + horasOcupadas.map { it.hour }
 
         val minutoAhora = if (fecha == hoy) ahora.toLocalTime().toSecondOfDay() / 60 else -1
 
@@ -62,7 +64,7 @@ class CalcularHorasLibresUseCase @Inject constructor(
                 }
                 val hora = slot / 60
                 val yaPaso = slot <= minutoAhora
-                if (!encimaBloqueo && !yaPaso && hora !in ocupadasPorPaciente) {
+                if (!encimaBloqueo && !yaPaso && hora !in ocupadas) {
                     horas.add(hora)
                 }
                 slot += 60

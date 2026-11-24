@@ -30,6 +30,12 @@ class FakeCitasRepository(
     private val mutex = Mutex()
     private val citas: MutableList<Cita> = semilla().toMutableList()
 
+    /** Citas de otros pacientes (el paciente no las ve en /mis-citas, pero ocupan el horario). */
+    private val ocupadasPorOtros: Set<Pair<LocalDate, LocalTime>> = run {
+        val dia = siguienteHabil(LocalDate.now(clock).plusDays(1))
+        setOf(dia to LocalTime.of(11, 0), dia to LocalTime.of(12, 0))
+    }
+
     override suspend fun getMisCitas(): ApiResult<List<Cita>> {
         delay(latenciaMs)
         return mutex.withLock { ApiResult.Success(citas.toList()) }
@@ -40,21 +46,44 @@ class FakeCitasRepository(
         return ApiResult.Success(horario(dia))
     }
 
+    override suspend fun getHorasOcupadas(fecha: LocalDate): ApiResult<Set<LocalTime>> {
+        delay(latenciaMs)
+        return mutex.withLock {
+            val propias = citas.filter { it.estado == EstadoCita.PENDIENTE && it.fecha == fecha }
+                .map { it.hora }
+            val deOtros = ocupadasPorOtros.filter { it.first == fecha }.map { it.second }
+            ApiResult.Success((propias + deOtros).toSet())
+        }
+    }
+
     override suspend fun agendar(fecha: LocalDate, hora: LocalTime): ApiResult<Unit> {
         delay(latenciaMs)
         val ahora = LocalDateTime.now(clock)
         val hoy = ahora.toLocalDate()
         if (hora.minute != 0) return ApiResult.Failure(AppError.Validation)
-        if (fecha.isBefore(hoy) || fecha.isAfter(hoy.plusDays(MAX_DIAS_AGENDA))) return ApiResult.Failure(AppError.Validation)
-        if (!LocalDateTime.of(fecha, hora).isAfter(ahora)) return ApiResult.Failure(AppError.Validation)
+        if (fecha.isBefore(hoy) || fecha.isAfter(hoy.plusDays(MAX_DIAS_AGENDA))) return ApiResult.Failure(
+            AppError.Validation
+        )
+        if (!LocalDateTime.of(fecha, hora)
+                .isAfter(ahora)
+        ) return ApiResult.Failure(AppError.Validation)
         if (!dentroDeHorario(fecha.dayOfWeek, hora)) return ApiResult.Failure(AppError.Validation)
 
         return mutex.withLock {
-            val ocupada = citas.any { it.estado == EstadoCita.PENDIENTE && it.fecha == fecha && it.hora == hora }
+            val ocupada = (fecha to hora) in ocupadasPorOtros ||
+                    citas.any { it.estado == EstadoCita.PENDIENTE && it.fecha == fecha && it.hora == hora }
             if (ocupada) {
                 ApiResult.Failure(AppError.Conflict)
             } else {
-                citas.add(Cita(UUID.randomUUID().toString(), fecha, hora, EstadoCita.PENDIENTE, null))
+                citas.add(
+                    Cita(
+                        UUID.randomUUID().toString(),
+                        fecha,
+                        hora,
+                        EstadoCita.PENDIENTE,
+                        null
+                    )
+                )
                 ApiResult.Success(Unit)
             }
         }
@@ -90,8 +119,10 @@ class FakeCitasRepository(
     private fun dentroDeHorario(dia: DayOfWeek, hora: LocalTime): Boolean {
         val bloques = horario(dia)
         val h = hora.hour
-        val disponible = bloques.any { it.tipo == TipoBloque.DISPONIBLE && h >= it.inicio.hour && h + 1 <= it.fin.hour }
-        val bloqueada = bloques.any { it.tipo == TipoBloque.BLOQUEADO && h < it.fin.hour && h + 1 > it.inicio.hour }
+        val disponible =
+            bloques.any { it.tipo == TipoBloque.DISPONIBLE && h >= it.inicio.hour && h + 1 <= it.fin.hour }
+        val bloqueada =
+            bloques.any { it.tipo == TipoBloque.BLOQUEADO && h < it.fin.hour && h + 1 > it.inicio.hour }
         return disponible && !bloqueada
     }
 
@@ -101,15 +132,28 @@ class FakeCitasRepository(
     private fun semilla(): List<Cita> {
         val hoy = LocalDate.now(clock)
         return listOf(
-            Cita("fake-1", siguienteHabil(hoy.plusDays(2)), LocalTime.of(10, 0), EstadoCita.PENDIENTE, null),
+            Cita(
+                "fake-1",
+                siguienteHabil(hoy.plusDays(2)),
+                LocalTime.of(10, 0),
+                EstadoCita.PENDIENTE,
+                null
+            ),
             Cita("fake-2", hoy.minusDays(7), LocalTime.of(11, 0), EstadoCita.COMPLETADA, null),
-            Cita("fake-3", hoy.minusDays(14), LocalTime.of(9, 0), EstadoCita.CANCELADA, "Me surgió un imprevisto")
+            Cita(
+                "fake-3",
+                hoy.minusDays(14),
+                LocalTime.of(9, 0),
+                EstadoCita.CANCELADA,
+                "Me surgió un imprevisto"
+            )
         )
     }
 
     private fun siguienteHabil(fecha: LocalDate): LocalDate {
         var f = fecha
-        while (f.dayOfWeek == DayOfWeek.SATURDAY || f.dayOfWeek == DayOfWeek.SUNDAY) f = f.plusDays(1)
+        while (f.dayOfWeek == DayOfWeek.SATURDAY || f.dayOfWeek == DayOfWeek.SUNDAY) f =
+            f.plusDays(1)
         return f
     }
 }

@@ -45,7 +45,10 @@ class RemoteCitasRepositoryTest {
     }
 
     private fun enqueue(code: Int, body: String) {
-        server.enqueue(MockResponse().setResponseCode(code).setBody(body).addHeader("Content-Type", "application/json"))
+        server.enqueue(
+            MockResponse().setResponseCode(code).setBody(body)
+                .addHeader("Content-Type", "application/json")
+        )
     }
 
     @Test
@@ -104,7 +107,10 @@ class RemoteCitasRepositoryTest {
     @Test
     fun `disponibilidad 404 es dia sin horarios`() = runTest {
         enqueue(404, """{"message":"No hay disponibilidad para este día"}""")
-        assertEquals(ApiResult.Success(emptyList<Any>()), repository.getDisponibilidad(DayOfWeek.SUNDAY))
+        assertEquals(
+            ApiResult.Success(emptyList<Any>()),
+            repository.getDisponibilidad(DayOfWeek.SUNDAY)
+        )
     }
 
     @Test
@@ -125,7 +131,10 @@ class RemoteCitasRepositoryTest {
     @Test
     fun `agendar 409 es Conflict`() = runTest {
         enqueue(409, """{"error":"Ya existe una cita en ese horario"}""")
-        assertEquals(ApiResult.Failure(AppError.Conflict), repository.agendar(LocalDate.of(2026, 11, 9), LocalTime.of(11, 0)))
+        assertEquals(
+            ApiResult.Failure(AppError.Conflict),
+            repository.agendar(LocalDate.of(2026, 11, 9), LocalTime.of(11, 0))
+        )
     }
 
     @Test
@@ -133,14 +142,23 @@ class RemoteCitasRepositoryTest {
         enqueue(422, """{"error":"Ese horario no está disponible"}""")
         enqueue(422, """{"error":{"hora":["The hora field format is invalid."]}}""")
         val fecha = LocalDate.of(2026, 11, 9)
-        assertEquals(ApiResult.Failure(AppError.Validation), repository.agendar(fecha, LocalTime.of(7, 0)))
-        assertEquals(ApiResult.Failure(AppError.Validation), repository.agendar(fecha, LocalTime.of(11, 0)))
+        assertEquals(
+            ApiResult.Failure(AppError.Validation),
+            repository.agendar(fecha, LocalTime.of(7, 0))
+        )
+        assertEquals(
+            ApiResult.Failure(AppError.Validation),
+            repository.agendar(fecha, LocalTime.of(11, 0))
+        )
     }
 
     @Test
     fun `agendar 404 sin perfil de paciente es NotFound`() = runTest {
         enqueue(404, """{"error":"No paciente record found for this user"}""")
-        assertEquals(ApiResult.Failure(AppError.NotFound), repository.agendar(LocalDate.of(2026, 11, 9), LocalTime.of(11, 0)))
+        assertEquals(
+            ApiResult.Failure(AppError.NotFound),
+            repository.agendar(LocalDate.of(2026, 11, 9), LocalTime.of(11, 0))
+        )
     }
 
     @Test
@@ -155,7 +173,10 @@ class RemoteCitasRepositoryTest {
         assertEquals("PUT", sinMotivo.method)
         assertEquals("/api/citas/c1/cancelar", sinMotivo.path)
         assertEquals("{}", sinMotivo.body.readUtf8())
-        assertEquals("""{"motivo_cancelacion":"Me surgió un imprevisto"}""", server.takeRequest().body.readUtf8())
+        assertEquals(
+            """{"motivo_cancelacion":"Me surgió un imprevisto"}""",
+            server.takeRequest().body.readUtf8()
+        )
     }
 
     @Test
@@ -172,5 +193,36 @@ class RemoteCitasRepositoryTest {
     fun `sin conexion es Network`() = runTest {
         server.shutdown()
         assertEquals(ApiResult.Failure(AppError.Network), repository.getMisCitas())
+    }
+
+    @Test
+    fun `ocupadas manda la fecha yyyy-MM-dd y mapea horas descartando mal formadas`() = runTest {
+        enqueue(200, """["08:00","13:00:00","9:00","no-es-hora"]""")
+
+        val result = repository.getHorasOcupadas(LocalDate.of(2026, 11, 25))
+
+        assertEquals("/api/citas/ocupadas/2026-11-25", server.takeRequest().path)
+        assertEquals(
+            ApiResult.Success(setOf(LocalTime.of(8, 0), LocalTime.of(13, 0), LocalTime.of(9, 0))),
+            result
+        )
+    }
+
+    @Test
+    fun `ocupadas lista vacia o 404 es conjunto vacio`() = runTest {
+        enqueue(200, "[]")
+        enqueue(404, """{"message":"No citas found"}""")
+        val fecha = LocalDate.of(2026, 11, 25)
+        assertEquals(ApiResult.Success(emptySet<LocalTime>()), repository.getHorasOcupadas(fecha))
+        assertEquals(ApiResult.Success(emptySet<LocalTime>()), repository.getHorasOcupadas(fecha))
+    }
+
+    @Test
+    fun `ocupadas sin conexion es Network`() = runTest {
+        server.shutdown()
+        assertEquals(
+            ApiResult.Failure(AppError.Network),
+            repository.getHorasOcupadas(LocalDate.of(2026, 11, 25))
+        )
     }
 }

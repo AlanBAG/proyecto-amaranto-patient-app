@@ -13,11 +13,13 @@ import java.time.LocalTime
  *
  * - getMisCitas: un 404 del back se devuelve como lista vacía.
  * - getDisponibilidad: un 404 del back se devuelve como lista vacía (día sin horarios).
+ * - getHorasOcupadas: horas ya tomadas por cualquier paciente ese día; un 404 es conjunto vacío.
  * - agendar / cancelar: los errores llegan como AppError; la UI elige el mensaje.
  */
 interface CitasRepository {
     suspend fun getMisCitas(): ApiResult<List<Cita>>
     suspend fun getDisponibilidad(dia: DayOfWeek): ApiResult<List<BloqueHorario>>
+    suspend fun getHorasOcupadas(fecha: LocalDate): ApiResult<Set<LocalTime>>
     suspend fun agendar(fecha: LocalDate, hora: LocalTime): ApiResult<Unit>
     suspend fun cancelar(id: String, motivo: String?): ApiResult<Unit>
 }

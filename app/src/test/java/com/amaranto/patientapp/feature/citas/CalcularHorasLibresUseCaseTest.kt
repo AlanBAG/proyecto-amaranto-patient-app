@@ -28,8 +28,12 @@ class CalcularHorasLibresUseCaseTest {
     private val manana = hoy.plusDays(1)
 
     private fun t(h: Int, m: Int = 0) = LocalTime.of(h, m)
-    private fun disp(i: LocalTime, f: LocalTime, activo: Boolean = true) = BloqueHorario(i, f, TipoBloque.DISPONIBLE, activo)
-    private fun bloq(i: LocalTime, f: LocalTime, activo: Boolean = true) = BloqueHorario(i, f, TipoBloque.BLOQUEADO, activo)
+    private fun disp(i: LocalTime, f: LocalTime, activo: Boolean = true) =
+        BloqueHorario(i, f, TipoBloque.DISPONIBLE, activo)
+
+    private fun bloq(i: LocalTime, f: LocalTime, activo: Boolean = true) =
+        BloqueHorario(i, f, TipoBloque.BLOQUEADO, activo)
+
     private fun horas(vararg h: Int) = h.map { t(it) }
 
     @Test
@@ -72,7 +76,11 @@ class CalcularHorasLibresUseCaseTest {
     fun `bloques inactivos se ignoran`() {
         val result = useCase(
             manana,
-            listOf(disp(t(8), t(12)), disp(t(15), t(18), activo = false), bloq(t(9), t(10), activo = false)),
+            listOf(
+                disp(t(8), t(12)),
+                disp(t(15), t(18), activo = false),
+                bloq(t(9), t(10), activo = false)
+            ),
             emptyList()
         )
         assertEquals(horas(8, 9, 10, 11), result)
@@ -120,5 +128,24 @@ class CalcularHorasLibresUseCaseTest {
         // 10:30 en CDMX = 16:30 UTC. Si se usara UTC, hoy ya no habría horas en un bloque 08-13.
         assertEquals(LocalDate.of(2026, 11, 10), hoy)
         assertEquals(horas(11, 12), useCase(hoy, listOf(disp(t(8), t(13))), emptyList()))
+    }
+
+    @Test
+    fun `excluye las horas ocupadas por otros pacientes`() {
+        val result = useCase(
+            manana,
+            listOf(disp(t(8), t(12))),
+            emptyList(),
+            horasOcupadas = setOf(t(8), t(10))
+        )
+        assertEquals(horas(9, 11), result)
+    }
+
+    @Test
+    fun `combina citas del paciente y horas ocupadas sin afectar horas fuera de horario`() {
+        val citas = listOf(Cita("1", manana, t(9), EstadoCita.PENDIENTE, null))
+        val result =
+            useCase(manana, listOf(disp(t(8), t(12))), citas, horasOcupadas = setOf(t(11), t(18)))
+        assertEquals(horas(8, 10), result)
     }
 }

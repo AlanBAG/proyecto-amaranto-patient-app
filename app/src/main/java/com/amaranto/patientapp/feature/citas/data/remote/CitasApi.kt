@@ -28,4 +28,11 @@ interface CitasApi {
         @Path("id") id: String,
         @Body body: CancelarCitaRequest
     ): Response<MessageResponse>
+
+    /**
+     * Horas ya agendadas por cualquier paciente en [fecha] (yyyy-MM-dd), p. ej. ["08:00"].
+     * Mensaje de Katia, 24 nov. Supuesto: sin citas = 200 [] (un 404 también se trata como vacío).
+     */
+    @GET("citas/ocupadas/{fecha}")
+    suspend fun getHorasOcupadas(@Path("fecha") fecha: String): Response<List<String>>
 }
